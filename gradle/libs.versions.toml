@@ -20,7 +20,7 @@ materialIconsExtended = "1.7.8"
 googleFonts = "1.10.3"
 
 datastorePreferences = "1.2.0"
-kotlinxSerializationJson = "1.10.0"
+kotlinxSerializationJson = "1.7.3"
 
 secretsGradle = "2.0.1"
 
