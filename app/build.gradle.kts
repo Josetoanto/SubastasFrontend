@@ -10,9 +10,7 @@ plugins {
 
 android {
     namespace = "com.josetoanto.subastas"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.josetoanto.subastas"
