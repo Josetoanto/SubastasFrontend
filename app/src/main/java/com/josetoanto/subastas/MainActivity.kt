@@ -9,6 +9,7 @@ import com.josetoanto.subastas.core.navigation.Navigation
 import com.josetoanto.subastas.core.ui.theme.SubastasTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+//Antonio
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
