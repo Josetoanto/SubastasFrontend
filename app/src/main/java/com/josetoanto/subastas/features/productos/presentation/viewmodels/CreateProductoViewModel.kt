@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.josetoanto.subastas.features.productos.domain.usecases.CreateProductoUseCase
 import com.josetoanto.subastas.features.productos.presentation.screens.CreateProductoUIState
+import com.josetoanto.subastas.core.utils.toReadableMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +40,7 @@ class CreateProductoViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, errorMessage = null) }
             createProductoUseCase(s.nombre, s.descripcion, precio, s.imagenUrl, s.fechaInicio, s.fechaFin)
                 .onSuccess { _state.update { st -> st.copy(isLoading = false, isSuccess = true) } }
-                .onFailure { e -> _state.update { st -> st.copy(isLoading = false, errorMessage = e.message ?: "Error al crear producto") } }
+                .onFailure { e -> _state.update { st -> st.copy(isLoading = false, errorMessage = e.toReadableMessage()) } }
         }
     }
 }

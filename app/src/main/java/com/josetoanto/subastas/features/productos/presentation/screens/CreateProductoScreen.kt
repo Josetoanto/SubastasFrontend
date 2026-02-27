@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.josetoanto.subastas.features.productos.presentation.components.DateTimePickerField
 import com.josetoanto.subastas.features.productos.presentation.viewmodels.CreateProductoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,11 +86,17 @@ fun CreateProductoScreen(
             OutlinedTextField(value = state.imagenUrl, onValueChange = viewModel::onImagenUrlChange,
                 label = { Text("URL de imagen (opcional)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
-            OutlinedTextField(value = state.fechaInicio, onValueChange = viewModel::onFechaInicioChange,
-                label = { Text("Fecha inicio (YYYY-MM-DDTHH:MM:SS)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            DateTimePickerField(
+                value = state.fechaInicio,
+                onValueChange = viewModel::onFechaInicioChange,
+                label = "Fecha inicio"
+            )
 
-            OutlinedTextField(value = state.fechaFin, onValueChange = viewModel::onFechaFinChange,
-                label = { Text("Fecha fin (YYYY-MM-DDTHH:MM:SS)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            DateTimePickerField(
+                value = state.fechaFin,
+                onValueChange = viewModel::onFechaFinChange,
+                label = "Fecha fin"
+            )
 
             state.errorMessage?.let { error ->
                 Text(text = error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
