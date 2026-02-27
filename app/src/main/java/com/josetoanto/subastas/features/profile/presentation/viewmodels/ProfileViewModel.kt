@@ -7,6 +7,7 @@ import com.josetoanto.subastas.features.profile.domain.usecases.DeleteAccountUse
 import com.josetoanto.subastas.features.profile.domain.usecases.GetProfileUseCase
 import com.josetoanto.subastas.features.profile.domain.usecases.UpdateProfileUseCase
 import com.josetoanto.subastas.features.profile.presentation.screens.ProfileUIState
+import com.josetoanto.subastas.core.utils.toReadableMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,9 +58,7 @@ class ProfileViewModel @Inject constructor(
                 .onSuccess { profile ->
                     _state.update { it.copy(isUpdating = false, profile = profile, updateSuccess = true, editPassword = "") }
                 }
-                .onFailure { e ->
-                    _state.update { it.copy(isUpdating = false, errorMessage = e.message ?: "Error al actualizar perfil") }
-                }
+                .onFailure { e -> _state.update { it.copy(isUpdating = false, errorMessage = e.toReadableMessage()) } }
         }
     }
 
@@ -75,7 +74,7 @@ class ProfileViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
             deleteAccountUseCase()
                 .onSuccess { _state.update { it.copy(isLoading = false, deleteSuccess = true) } }
-                .onFailure { e -> _state.update { it.copy(isLoading = false, errorMessage = e.message ?: "Error al eliminar cuenta") } }
+                .onFailure { e -> _state.update { it.copy(isLoading = false, errorMessage = e.toReadableMessage()) } }
         }
     }
 }
