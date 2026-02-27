@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,10 +21,15 @@ class TokenDataStore @Inject constructor(
 ) {
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
+        private val USER_ID_KEY = intPreferencesKey("user_id")  // ← nuevo
     }
 
     fun getToken(): Flow<String?> = context.dataStore.data.map { prefs ->
         prefs[TOKEN_KEY]
+    }
+
+    fun getUserId(): Flow<Int?> = context.dataStore.data.map { prefs ->  // ← nuevo
+        prefs[USER_ID_KEY]
     }
 
     suspend fun saveToken(token: String) {
@@ -32,9 +38,16 @@ class TokenDataStore @Inject constructor(
         }
     }
 
+    suspend fun saveUserId(id: Int) {  // ← nuevo
+        context.dataStore.edit { prefs ->
+            prefs[USER_ID_KEY] = id
+        }
+    }
+
     suspend fun clearToken() {
         context.dataStore.edit { prefs ->
             prefs.remove(TOKEN_KEY)
+            prefs.remove(USER_ID_KEY)  // ← limpia también
         }
     }
 }

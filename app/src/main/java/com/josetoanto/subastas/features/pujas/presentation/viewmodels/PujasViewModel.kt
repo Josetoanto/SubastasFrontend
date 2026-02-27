@@ -7,6 +7,7 @@ import com.josetoanto.subastas.features.pujas.domain.usecases.CreatePujaUseCase
 import com.josetoanto.subastas.features.pujas.domain.usecases.GetGanadorUseCase
 import com.josetoanto.subastas.features.pujas.domain.usecases.GetPujasByProductoUseCase
 import com.josetoanto.subastas.features.pujas.presentation.screens.PujasUIState
+import com.josetoanto.subastas.core.utils.toReadableMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +41,7 @@ class PujasViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
             getPujasByProductoUseCase(productId)
                 .onSuccess { pujas -> _state.update { it.copy(isLoading = false, pujas = pujas) } }
-                .onFailure { e -> _state.update { it.copy(isLoading = false, errorMessage = e.message) } }
+                .onFailure { e -> _state.update { it.copy(isLoading = false, errorMessage = e.toReadableMessage()) } }
         }
     }
 
@@ -65,7 +66,7 @@ class PujasViewModel @Inject constructor(
                     _state.update { it.copy(isBidding = false, bidSuccess = true, cantidadPuja = "", pujas = listOf(puja) + it.pujas) }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isBidding = false, errorMessage = e.message ?: "Error al realizar puja") }
+                    _state.update { it.copy(isBidding = false, errorMessage = e.toReadableMessage()) }
                 }
         }
     }
