@@ -21,14 +21,14 @@ class TokenDataStore @Inject constructor(
 ) {
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
-        private val USER_ID_KEY = intPreferencesKey("user_id")  // ← nuevo
+        private val USER_ID_KEY = intPreferencesKey("user_id")
     }
 
     fun getToken(): Flow<String?> = context.dataStore.data.map { prefs ->
         prefs[TOKEN_KEY]
     }
 
-    fun getUserId(): Flow<Int?> = context.dataStore.data.map { prefs ->  // ← nuevo
+    fun getUserId(): Flow<Int?> = context.dataStore.data.map { prefs ->
         prefs[USER_ID_KEY]
     }
 
@@ -38,7 +38,7 @@ class TokenDataStore @Inject constructor(
         }
     }
 
-    suspend fun saveUserId(id: Int) {  // ← nuevo
+    suspend fun saveUserId(id: Int) {
         context.dataStore.edit { prefs ->
             prefs[USER_ID_KEY] = id
         }
@@ -47,7 +47,7 @@ class TokenDataStore @Inject constructor(
     suspend fun clearToken() {
         context.dataStore.edit { prefs ->
             prefs.remove(TOKEN_KEY)
-            prefs.remove(USER_ID_KEY)  // ← limpia también
+            prefs.remove(USER_ID_KEY)
         }
     }
 }

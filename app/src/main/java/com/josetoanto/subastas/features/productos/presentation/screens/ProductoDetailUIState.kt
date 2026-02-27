@@ -7,5 +7,5 @@ data class ProductoDetailUIState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val deleteSuccess: Boolean = false,
-    val isOwner: Boolean = false   // ← agrega esto
+    val isOwner: Boolean = false
 )

@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.josetoanto.subastas.features.productos.presentation.components.DateTimePickerField
 import com.josetoanto.subastas.features.productos.presentation.viewmodels.CreateProductoViewModel
+import android.net.Uri
+import com.josetoanto.subastas.features.productos.presentation.components.ImagePickerField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,8 +85,10 @@ fun CreateProductoScreen(
                 label = { Text("Precio inicial") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
 
-            OutlinedTextField(value = state.imagenUrl, onValueChange = viewModel::onImagenUrlChange,
-                label = { Text("URL de imagen (opcional)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            ImagePickerField(
+                imageUri = state.imageUri,
+                onImageSelected = viewModel::onImageSelected
+            )
 
             DateTimePickerField(
                 value = state.fechaInicio,
