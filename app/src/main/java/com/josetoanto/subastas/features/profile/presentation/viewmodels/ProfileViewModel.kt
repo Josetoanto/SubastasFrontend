@@ -51,14 +51,24 @@ class ProfileViewModel @Inject constructor(
         val s = _state.value
         val nombre = s.editNombre.takeIf { it.isNotBlank() }
         val password = s.editPassword.takeIf { it.isNotBlank() }
+        // Save previous profile for rollback
+        val previousProfile = s.profile
+        if (previousProfile == null) {
+            _state.update { it.copy(errorMessage = "No se pudo cargar el perfil. Intenta de nuevo.") }
+            return
+        }
+        // Optimistic update: reflect name change in UI immediately
+        val optimisticProfile = previousProfile.copy(nombre = nombre ?: previousProfile.nombre)
+        _state.update { it.copy(isUpdating = true, errorMessage = null, profile = optimisticProfile) }
         viewModelScope.launch {
-            _state.update { it.copy(isUpdating = true, errorMessage = null) }
             updateProfileUseCase(nombre, password)
                 .onSuccess { profile ->
+                    // Confirm update with server-side profile
                     _state.update { it.copy(isUpdating = false, profile = profile, updateSuccess = true, editPassword = "") }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isUpdating = false, errorMessage = e.message ?: "Error al actualizar perfil") }
+                    // Rollback: restore previous profile and show error
+                    _state.update { it.copy(isUpdating = false, profile = previousProfile, errorMessage = e.message ?: "Error al actualizar perfil") }
                 }
         }
     }
