@@ -7,6 +7,7 @@ import com.josetoanto.subastas.features.auth.domain.usecases.LogoutUseCase
 import com.josetoanto.subastas.features.auth.domain.usecases.RegisterUseCase
 import com.josetoanto.subastas.features.auth.presentation.screens.LoginUIState
 import com.josetoanto.subastas.features.auth.presentation.screens.RegisterUIState
+import com.josetoanto.subastas.core.utils.toReadableMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,7 +59,7 @@ class AuthViewModel @Inject constructor(
             _loginState.update { it.copy(isLoading = true, errorMessage = null) }
             loginUseCase(state.email, state.password)
                 .onSuccess { _loginState.update { s -> s.copy(isLoading = false, isSuccess = true) } }
-                .onFailure { e -> _loginState.update { s -> s.copy(isLoading = false, errorMessage = e.message ?: "Error al iniciar sesión") } }
+                .onFailure { e -> _loginState.update { s -> s.copy(isLoading = false, errorMessage = e.toReadableMessage()) } }
         }
     }
 
@@ -72,7 +73,7 @@ class AuthViewModel @Inject constructor(
             _registerState.update { it.copy(isLoading = true, errorMessage = null) }
             registerUseCase(state.nombre, state.email, state.password)
                 .onSuccess { _registerState.update { s -> s.copy(isLoading = false, isSuccess = true) } }
-                .onFailure { e -> _registerState.update { s -> s.copy(isLoading = false, errorMessage = e.message ?: "Error al registrarse") } }
+                .onFailure { e -> _registerState.update { s -> s.copy(isLoading = false, errorMessage = e.toReadableMessage()) } }
         }
     }
 

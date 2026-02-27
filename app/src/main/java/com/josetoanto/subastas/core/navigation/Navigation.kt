@@ -36,7 +36,7 @@ fun Navigation(navController: NavHostController) {
         composable(route = Screens.Register.route) {
             RegisterScreen(
                 onRegisterSuccess = {
-                    navController.navigate(Screens.Home.route) {
+                    navController.navigate(Screens.Login.route) {
                         popUpTo(Screens.Login.route) { inclusive = true }
                     }
                 },
