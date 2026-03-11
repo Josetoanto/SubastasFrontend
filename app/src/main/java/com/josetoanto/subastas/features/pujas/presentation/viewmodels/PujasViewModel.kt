@@ -49,10 +49,10 @@ class PujasViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             currentUserId = tokenDataStore.getUserId().first()
+            loadPujas()
+            loadGanador()
+            connectWebSocket()
         }
-        loadPujas()
-        loadGanador()
-        connectWebSocket()
     }
 
     private fun connectWebSocket() {
@@ -97,7 +97,10 @@ class PujasViewModel @Inject constructor(
     private fun loadGanador() {
         viewModelScope.launch {
             getGanadorUseCase(productId)
-                .onSuccess { ganador -> _state.update { it.copy(ganador = ganador) } }
+                .onSuccess { ganador ->
+                    val yoGane = ganador.usuarioId == currentUserId
+                    _state.update { it.copy(ganador = ganador, yoGane = yoGane) }
+                }
         }
     }
 

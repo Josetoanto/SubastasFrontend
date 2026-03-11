@@ -11,5 +11,6 @@ data class PujasUIState(
     val isBidding: Boolean = false,
     val errorMessage: String? = null,
     val bidSuccess: Boolean = false,
-    val fuiSuperado: Boolean = false
+    val fuiSuperado: Boolean = false,
+    val yoGane: Boolean = false
 )

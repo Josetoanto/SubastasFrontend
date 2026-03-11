@@ -30,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.josetoanto.subastas.core.utils.WinnerSound
 import com.josetoanto.subastas.core.utils.vibrateOutbid
 import com.josetoanto.subastas.features.pujas.presentation.components.PujaCard
 import com.josetoanto.subastas.features.pujas.presentation.viewmodels.PujasViewModel
@@ -54,10 +56,21 @@ fun PujasScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
 
+    DisposableEffect(Unit) {
+        WinnerSound.init(context)
+        onDispose { WinnerSound.release() }
+    }
+
     LaunchedEffect(state.fuiSuperado) {
         if (state.fuiSuperado) {
             vibrateOutbid(context)
             viewModel.resetFuiSuperado()
+        }
+    }
+
+    LaunchedEffect(state.yoGane) {
+        if (state.yoGane) {
+            WinnerSound.play()
         }
     }
 
@@ -127,7 +140,12 @@ fun PujasScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (state.yoGane)
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            else
+                                MaterialTheme.colorScheme.secondaryContainer
+                        )
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
@@ -136,12 +154,15 @@ fun PujasScreen(
                             Icon(
                                 Icons.Filled.EmojiEvents,
                                 contentDescription = "Ganador",
-                                tint = MaterialTheme.colorScheme.tertiary
+                                tint = if (state.yoGane)
+                                    MaterialTheme.colorScheme.tertiary
+                                else
+                                    MaterialTheme.colorScheme.secondary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
                                 Text(
-                                    "¡Ganador!",
+                                    if (state.yoGane) "¡Felicidades, ganaste!" else "¡Ganador!",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold
                                 )
