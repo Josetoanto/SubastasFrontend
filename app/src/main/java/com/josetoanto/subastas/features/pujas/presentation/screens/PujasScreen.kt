@@ -30,14 +30,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.josetoanto.subastas.core.utils.vibrateOutbid
 import com.josetoanto.subastas.features.pujas.presentation.components.PujaCard
 import com.josetoanto.subastas.features.pujas.presentation.viewmodels.PujasViewModel
 
@@ -49,6 +52,14 @@ fun PujasScreen(
     viewModel: PujasViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(state.fuiSuperado) {
+        if (state.fuiSuperado) {
+            vibrateOutbid(context)
+            viewModel.resetFuiSuperado()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -69,14 +80,20 @@ fun PujasScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Bid form
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Realizar una puja", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "Realizar una puja",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             OutlinedTextField(
                                 value = state.cantidadPuja,
@@ -96,32 +113,48 @@ fun PujasScreen(
                             }
                         }
                         state.errorMessage?.let {
-                            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }
             }
 
-            // Ganador banner
             state.ganador?.let { ganador ->
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
                     ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.EmojiEvents, contentDescription = "Ganador", tint = MaterialTheme.colorScheme.tertiary)
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Filled.EmojiEvents,
+                                contentDescription = "Ganador",
+                                tint = MaterialTheme.colorScheme.tertiary
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
-                                Text("¡Ganador!", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                                Text("${ganador.nombreGanador} — $${ganador.cantidadGanadora}", style = MaterialTheme.typography.bodyMedium)
+                                Text(
+                                    "¡Ganador!",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    "${ganador.nombreGanador} — $${ganador.cantidadGanadora}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
                 }
             }
 
-            // Bids header
             item {
                 Text(
                     text = "Historial de pujas (${state.pujas.size})",
@@ -131,9 +164,19 @@ fun PujasScreen(
             }
 
             if (state.isLoading) {
-                item { Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) { CircularProgressIndicator() }
+                }
             } else if (state.pujas.isEmpty()) {
-                item { Text("Aún no hay pujas para esta subasta.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                item {
+                    Text(
+                        "Aún no hay pujas para esta subasta.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             } else {
                 items(state.pujas, key = { it.id }) { puja ->
                     PujaCard(puja = puja)
