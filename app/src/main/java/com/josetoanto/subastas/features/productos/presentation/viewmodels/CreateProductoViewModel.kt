@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.josetoanto.subastas.core.utils.toReadableMessage
+import com.josetoanto.subastas.core.hardware.domain.FeatureManager
 import com.josetoanto.subastas.features.productos.domain.usecases.CreateProductoUseCase
 import com.josetoanto.subastas.features.productos.presentation.screens.CreateProductoUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,8 +21,11 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateProductoViewModel @Inject constructor(
     private val createProductoUseCase: CreateProductoUseCase,
+    private val featureManager: FeatureManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    val hasCameraFeature: Boolean = featureManager.hasCameraFeature()
 
     private val _state = MutableStateFlow(CreateProductoUIState())
     val state: StateFlow<CreateProductoUIState> = _state.asStateFlow()

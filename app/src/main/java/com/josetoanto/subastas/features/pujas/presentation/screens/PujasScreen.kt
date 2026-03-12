@@ -27,11 +27,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +53,14 @@ fun PujasScreen(
     viewModel: PujasViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.bidError) {
+        state.bidError?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearBidError()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -56,11 +68,12 @@ fun PujasScreen(
                 title = { Text("Pujas") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atras")
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier

@@ -78,25 +78,42 @@ fun RegisterScreen(
                     onValueChange = viewModel::onRegisterNombreChange,
                     label = "Nombre completo",
                     leadingIcon = Icons.Filled.Person,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = state.nombreError != null,
+                    supportingText = state.nombreError
                 )
 
                 AuthTextField(
                     value = state.email,
                     onValueChange = viewModel::onRegisterEmailChange,
-                    label = "Correo electrónico",
+                    label = "Correo electronico",
                     leadingIcon = Icons.Filled.Email,
                     keyboardType = KeyboardType.Email,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = state.emailError != null,
+                    supportingText = state.emailError
                 )
 
                 AuthTextField(
                     value = state.password,
                     onValueChange = viewModel::onRegisterPasswordChange,
-                    label = "Contraseña",
+                    label = "Contrasena",
                     leadingIcon = Icons.Filled.Lock,
                     isPassword = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = state.passwordError != null,
+                    supportingText = state.passwordError
+                )
+
+                AuthTextField(
+                    value = state.confirmPassword,
+                    onValueChange = viewModel::onRegisterConfirmPasswordChange,
+                    label = "Confirmar contrasena",
+                    leadingIcon = Icons.Filled.Lock,
+                    isPassword = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = state.confirmPasswordError != null,
+                    supportingText = state.confirmPasswordError
                 )
 
                 state.errorMessage?.let { error ->

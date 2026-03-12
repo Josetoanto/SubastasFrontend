@@ -87,7 +87,8 @@ fun CreateProductoScreen(
 
             ImagePickerField(
                 imageUri = state.imageUri,
-                onImageSelected = viewModel::onImageSelected
+                onImageSelected = viewModel::onImageSelected,
+                hasCameraFeature = viewModel.hasCameraFeature
             )
 
             DateTimePickerField(
