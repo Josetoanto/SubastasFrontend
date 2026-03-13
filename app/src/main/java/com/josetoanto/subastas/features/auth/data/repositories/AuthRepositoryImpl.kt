@@ -8,10 +8,12 @@ import com.josetoanto.subastas.features.auth.data.datasources.remote.models.Regi
 import com.josetoanto.subastas.features.auth.domain.entities.AuthToken
 import com.josetoanto.subastas.features.auth.domain.entities.User
 import com.josetoanto.subastas.features.auth.domain.repositories.AuthRepository
+import com.josetoanto.subastas.features.profile.data.datasources.remote.api.ProfileApi
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
+    private val profileApi: ProfileApi,
     private val tokenDataStore: TokenDataStore
 ) : AuthRepository {
 
@@ -19,6 +21,8 @@ class AuthRepositoryImpl @Inject constructor(
         val response = authApi.login(LoginRequestDto(email = email, contrasena = password))
         val token = response.toDomain()
         tokenDataStore.saveToken(token.accessToken)
+        val me = profileApi.getMe()
+        tokenDataStore.saveUserId(me.id)
         token
     }
 

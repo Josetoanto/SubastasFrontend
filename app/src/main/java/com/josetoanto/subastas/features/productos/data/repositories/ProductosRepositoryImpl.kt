@@ -8,6 +8,12 @@ import com.josetoanto.subastas.features.productos.domain.entities.Producto
 import com.josetoanto.subastas.features.productos.domain.entities.ProductoDetail
 import com.josetoanto.subastas.features.productos.domain.repositories.ProductosRepository
 import javax.inject.Inject
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 
 class ProductosRepositoryImpl @Inject constructor(
     private val api: ProductosApi
@@ -29,15 +35,25 @@ class ProductosRepositoryImpl @Inject constructor(
         fechaInicio: String,
         fechaFin: String
     ): Result<Producto> = runCatching {
+        val nombreBody = nombre.toRequestBody("text/plain".toMediaType())
+        val descripcionBody = descripcion.toRequestBody("text/plain".toMediaType())
+        val precioBody = precioInicial.toString().toRequestBody("text/plain".toMediaType())
+        val fechaInicioBody = fechaInicio.toRequestBody("text/plain".toMediaType())
+        val fechaFinBody = fechaFin.toRequestBody("text/plain".toMediaType())
+
+        val imagenPart = if (imagenUrl.isNotBlank()) {
+            val file = File(imagenUrl)
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("imagen", file.name, requestFile)
+        } else null
+
         api.createProducto(
-            CreateProductoRequestDto(
-                nombre = nombre,
-                descripcion = descripcion,
-                precioInicial = precioInicial,
-                imagenUrl = imagenUrl,
-                fechaInicio = fechaInicio,
-                fechaFin = fechaFin
-            )
+            nombre = nombreBody,
+            descripcion = descripcionBody,
+            precioInicial = precioBody,
+            fechaInicio = fechaInicioBody,
+            fechaFin = fechaFinBody,
+            imagen = imagenPart
         ).toDomain()
     }
 

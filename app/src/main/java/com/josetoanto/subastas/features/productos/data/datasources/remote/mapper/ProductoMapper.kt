@@ -8,25 +8,25 @@ import com.josetoanto.subastas.features.productos.domain.entities.ProductoDetail
 fun ProductoDto.toDomain(): Producto = Producto(
     id = id,
     nombre = nombre,
-    descripcion = descripcion,
+    descripcion = descripcion ?: "",
     precioInicial = precioInicial,
-    imagenUrl = imagenUrl,
+    imagenUrl = imagenUrl ?: "",
     status = status,
     fechaInicio = fechaInicio,
     fechaFin = fechaFin,
-    precioActual = precioActual
+    precioActual = precioActual ?: precioInicial
 )
 
 fun ProductoDetailDto.toDomain(): ProductoDetail = ProductoDetail(
     id = id,
     nombre = nombre,
-    descripcion = descripcion,
+    descripcion = descripcion ?: "",
     precioInicial = precioInicial,
-    imagenUrl = imagenUrl,
+    imagenUrl = imagenUrl ?: "",
     status = status,
     fechaInicio = fechaInicio,
     fechaFin = fechaFin,
-    precioActual = precioActual,
+    precioActual = precioActual ?: precioInicial,
     nombreVendedor = nombreVendedor,
     usuarioId = usuarioId
 )

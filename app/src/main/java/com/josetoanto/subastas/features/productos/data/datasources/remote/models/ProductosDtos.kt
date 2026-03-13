@@ -7,26 +7,26 @@ import kotlinx.serialization.Serializable
 data class ProductoDto(
     @SerialName("id") val id: Int,
     @SerialName("nombre") val nombre: String,
-    @SerialName("descripcion") val descripcion: String,
+    @SerialName("descripcion") val descripcion: String? = null,
     @SerialName("precio_inicial") val precioInicial: Double,
-    @SerialName("imagen_url") val imagenUrl: String,
+    @SerialName("imagen_url") val imagenUrl: String? = null,
     @SerialName("status") val status: String,
     @SerialName("fecha_inicio") val fechaInicio: String,
     @SerialName("fecha_fin") val fechaFin: String,
-    @SerialName("precio_actual") val precioActual: Double
+    @SerialName("precio_actual") val precioActual: Double? = null
 )
 
 @Serializable
 data class ProductoDetailDto(
     @SerialName("id") val id: Int,
     @SerialName("nombre") val nombre: String,
-    @SerialName("descripcion") val descripcion: String,
+    @SerialName("descripcion") val descripcion: String? = null,
     @SerialName("precio_inicial") val precioInicial: Double,
-    @SerialName("imagen_url") val imagenUrl: String,
+    @SerialName("imagen_url") val imagenUrl: String? = null,
     @SerialName("status") val status: String,
     @SerialName("fecha_inicio") val fechaInicio: String,
     @SerialName("fecha_fin") val fechaFin: String,
-    @SerialName("precio_actual") val precioActual: Double,
+    @SerialName("precio_actual") val precioActual: Double? = null,
     @SerialName("nombre_vendedor") val nombreVendedor: String,
     @SerialName("usuario_id") val usuarioId: Int
 )
@@ -36,7 +36,7 @@ data class CreateProductoRequestDto(
     @SerialName("nombre") val nombre: String,
     @SerialName("descripcion") val descripcion: String,
     @SerialName("precio_inicial") val precioInicial: Double,
-    @SerialName("imagen_url") val imagenUrl: String,
+    @SerialName("imagen_url") val imagenUrl: String? = null,
     @SerialName("fecha_inicio") val fechaInicio: String,
     @SerialName("fecha_fin") val fechaFin: String
 )

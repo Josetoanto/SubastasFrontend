@@ -16,7 +16,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-private const val BASE_URL = "https://tu-api.com/" // TODO: Cambia por tu URL real
+private const val BASE_URL = "http://3.211.145.251:8000/"
 
 @Module
 @InstallIn(SingletonComponent::class)

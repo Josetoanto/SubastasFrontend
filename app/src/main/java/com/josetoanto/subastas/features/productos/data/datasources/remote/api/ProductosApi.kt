@@ -10,14 +10,26 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.http.Multipart
+import retrofit2.http.Part
 
 interface ProductosApi {
 
     @GET("api/v1/productos")
     suspend fun getProductos(): List<ProductoDto>
 
+    @Multipart
     @POST("api/v1/productos")
-    suspend fun createProducto(@Body body: CreateProductoRequestDto): ProductoDto
+    suspend fun createProducto(
+        @Part("nombre") nombre: RequestBody,
+        @Part("descripcion") descripcion: RequestBody,
+        @Part("precio_inicial") precioInicial: RequestBody,
+        @Part("fecha_inicio") fechaInicio: RequestBody,
+        @Part("fecha_fin") fechaFin: RequestBody,
+        @Part imagen: MultipartBody.Part? = null
+    ): ProductoDto
 
     @GET("api/v1/productos/{producto_id}")
     suspend fun getProductoById(@Path("producto_id") id: Int): ProductoDetailDto

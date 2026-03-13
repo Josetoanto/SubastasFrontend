@@ -23,7 +23,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -86,8 +85,14 @@ fun ProductoDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+                    if (state.isOwner) {
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = "Eliminar",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             )
@@ -125,34 +130,69 @@ fun ProductoDetailScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = p.nombre, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                            Text(text = "Vendedor: ${p.nombreVendedor}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                text = p.nombre,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Vendedor: ${p.nombreVendedor}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                             Text(text = p.descripcion, style = MaterialTheme.typography.bodyLarge)
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Column {
                                     Text("Precio inicial", style = MaterialTheme.typography.labelMedium)
-                                    Text("$${p.precioInicial}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                                    Text(
+                                        "$${p.precioInicial}",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
                                 }
                                 Column {
                                     Text("Precio actual", style = MaterialTheme.typography.labelMedium)
-                                    Text("$${p.precioActual}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                    Text(
+                                        "$${p.precioActual}",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                                 }
                                 Column {
                                     Text("Estado", style = MaterialTheme.typography.labelMedium)
-                                    Text(p.status, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                                    Text(
+                                        p.status,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
                                 }
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("Inicio: ${p.fechaInicio}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Fin: ${p.fechaFin}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "Inicio: ${p.fechaInicio}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "Fin: ${p.fechaFin}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Button(onClick = onNavigateToBids, modifier = Modifier.fillMaxWidth()) {
+                            Button(
+                                onClick = onNavigateToBids,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Icon(Icons.Filled.Gavel, contentDescription = null)
                                 Text("  Ver Pujas / Pujar")
                             }

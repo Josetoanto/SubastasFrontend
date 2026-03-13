@@ -6,7 +6,8 @@ data class Puja(
     val usuarioId: Int,
     val nombrePostor: String,
     val cantidad: Double,
-    val fecha: String
+    val fecha: String,
+    val isPending: Boolean = false
 )
 
 data class Ganador(
