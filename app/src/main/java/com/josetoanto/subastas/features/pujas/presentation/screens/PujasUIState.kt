@@ -10,6 +10,5 @@ data class PujasUIState(
     val isLoading: Boolean = false,
     val isBidding: Boolean = false,
     val errorMessage: String? = null,
-    val bidSuccess: Boolean = false,
-    val bidError: String? = null
+    val bidSuccess: Boolean = false
 )

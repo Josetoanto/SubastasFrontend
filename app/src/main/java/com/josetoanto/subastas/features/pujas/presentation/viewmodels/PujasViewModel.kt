@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.josetoanto.subastas.core.websocket.WebSocketManager
 import com.josetoanto.subastas.features.pujas.data.datasources.remote.models.PujaDto
-import com.josetoanto.subastas.features.pujas.domain.entities.Puja
 import com.josetoanto.subastas.features.pujas.domain.usecases.CreatePujaUseCase
 import com.josetoanto.subastas.features.pujas.domain.usecases.GetGanadorUseCase
 import com.josetoanto.subastas.features.pujas.domain.usecases.GetPujasByProductoUseCase
@@ -80,54 +79,20 @@ class PujasViewModel @Inject constructor(
     fun placeBid() {
         val cantidad = _state.value.cantidadPuja.toDoubleOrNull()
         if (cantidad == null || cantidad <= 0) {
-            _state.update { it.copy(errorMessage = "Ingresa un monto valido") }
+            _state.update { it.copy(errorMessage = "Ingresa un monto válido") }
             return
         }
-
-        val tempId = -(System.currentTimeMillis() % Int.MAX_VALUE).toInt()
-        val optimisticPuja = Puja(
-            id = tempId,
-            productoId = productId,
-            usuarioId = 0,
-            nombrePostor = "Tu",
-            cantidad = cantidad,
-            fecha = "Enviando...",
-            isPending = true
-        )
-
-        _state.update { currentState ->
-            currentState.copy(
-                pujas = listOf(optimisticPuja) + currentState.pujas,
-                cantidadPuja = "",
-                isBidding = true,
-                errorMessage = null,
-                bidError = null
-            )
-        }
-
         viewModelScope.launch {
+            _state.update { it.copy(isBidding = true, errorMessage = null) }
             createPujaUseCase(productId, cantidad)
                 .onSuccess {
-                    _state.update { currentState ->
-                        currentState.copy(
-                            isBidding = false,
-                            pujas = currentState.pujas.filter { p -> p.id != tempId }
-                        )
-                    }
+                    _state.update { it.copy(isBidding = false, cantidadPuja = "") }
                 }
                 .onFailure { e ->
-                    _state.update { currentState ->
-                        currentState.copy(
-                            isBidding = false,
-                            pujas = currentState.pujas.filter { p -> p.id != tempId },
-                            bidError = e.message ?: "Error al realizar puja"
-                        )
-                    }
+                    _state.update { it.copy(isBidding = false, errorMessage = e.message ?: "Error al realizar puja") }
                 }
         }
     }
-
-    fun clearBidError() = _state.update { it.copy(bidError = null) }
 
     fun resetBidSuccess() = _state.update { it.copy(bidSuccess = false) }
 }
