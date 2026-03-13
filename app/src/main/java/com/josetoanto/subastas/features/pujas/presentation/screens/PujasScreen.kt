@@ -1,5 +1,7 @@
 package com.josetoanto.subastas.features.pujas.presentation.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +48,7 @@ import com.josetoanto.subastas.core.utils.vibrateOutbid
 import com.josetoanto.subastas.features.pujas.presentation.components.PujaCard
 import com.josetoanto.subastas.features.pujas.presentation.viewmodels.PujasViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PujasScreen(
@@ -68,9 +71,10 @@ fun PujasScreen(
         }
     }
 
-    LaunchedEffect(state.yoGane) {
-        if (state.yoGane) {
+    LaunchedEffect(state.acabaDeGanar) {
+        if (state.acabaDeGanar) {
             WinnerSound.play()
+            viewModel.resetAcabaDeGanar()
         }
     }
 
