@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LoginRequestDto(
     @SerialName("email") val email: String,
-    @SerialName("contrasena") val contrasena: String
+    @SerialName("contrasena") val contrasena: String,
+    @SerialName("fcm_token") val fcmToken: String? = null
 )
 
 @Serializable

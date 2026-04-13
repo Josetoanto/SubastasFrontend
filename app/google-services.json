@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "721875906991",
+    "project_id": "subastas-95311",
+    "storage_bucket": "subastas-95311.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721875906991:android:be2ba6284a3ea6f12dbf5a",
+        "android_client_info": {
+          "package_name": "com.josetoanto.subastas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVs90msWfLnsCHbBDhi5QFnJY9KdaLuLk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

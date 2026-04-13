@@ -14,7 +14,13 @@ fun ProductoDto.toDomain(): Producto = Producto(
     status = status,
     fechaInicio = fechaInicio,
     fechaFin = fechaFin,
-    precioActual = precioActual ?: precioInicial
+    precioActual = precioActual ?: precioInicial,
+    latitud = latitud,
+    longitud = longitud,
+        usuarioId = usuarioId,
+    ciudad = ciudad ?: "",
+    entregaEnPersona = entregaEnPersona ?: false,
+    esRelampago = esRelampago ?: false
 )
 
 fun ProductoDetailDto.toDomain(): ProductoDetail = ProductoDetail(
@@ -28,5 +34,10 @@ fun ProductoDetailDto.toDomain(): ProductoDetail = ProductoDetail(
     fechaFin = fechaFin,
     precioActual = precioActual ?: precioInicial,
     nombreVendedor = nombreVendedor,
-    usuarioId = usuarioId
+    usuarioId = usuarioId,
+    latitud = latitud,
+    longitud = longitud,
+    ciudad = ciudad ?: "",
+    entregaEnPersona = entregaEnPersona ?: false,
+    esRelampago = esRelampago ?: false
 )

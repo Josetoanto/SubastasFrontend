@@ -1,10 +1,10 @@
 package com.josetoanto.subastas.features.productos.data.repositories
 
 import com.josetoanto.subastas.features.productos.data.datasources.remote.api.ProductosApi
-import com.josetoanto.subastas.features.productos.data.datasources.remote.mapper.toDomain
-import com.josetoanto.subastas.features.productos.data.datasources.remote.models.CreateProductoRequestDto
+import com.josetoanto.subastas.features.productos.data.datasources.remote.mapper.*
 import com.josetoanto.subastas.features.productos.data.datasources.remote.models.UpdateProductoRequestDto
 import com.josetoanto.subastas.features.productos.domain.entities.Producto
+import com.josetoanto.subastas.features.productos.domain.entities.ProductoAnalytics
 import com.josetoanto.subastas.features.productos.domain.entities.ProductoDetail
 import com.josetoanto.subastas.features.productos.domain.repositories.ProductosRepository
 import javax.inject.Inject
@@ -19,8 +19,22 @@ class ProductosRepositoryImpl @Inject constructor(
     private val api: ProductosApi
 ) : ProductosRepository {
 
-    override suspend fun getProductos(): Result<List<Producto>> = runCatching {
-        api.getProductos().map { it.toDomain() }
+    override suspend fun getProductos(
+        ciudad: String?,
+        lat: Double?,
+        lon: Double?,
+        radioKm: Double?,
+        soloRelampago: Boolean,
+        soloEntregaPersona: Boolean
+    ): Result<List<Producto>> = runCatching {
+        api.getProductos(
+            ciudad = ciudad,
+            lat = lat,
+            lon = lon,
+            radioKm = radioKm,
+            soloRelampago = if (soloRelampago) true else null,
+            soloEntregaPersona = if (soloEntregaPersona) true else null
+        ).map { it.toDomain() }
     }
 
     override suspend fun getProductoById(id: Int): Result<ProductoDetail> = runCatching {
@@ -33,13 +47,24 @@ class ProductosRepositoryImpl @Inject constructor(
         precioInicial: Double,
         imagenUrl: String,
         fechaInicio: String,
-        fechaFin: String
+        fechaFin: String,
+        latitud: Double?,
+        longitud: Double?,
+        ciudad: String?,
+        entregaEnPersona: Boolean,
+        esRelampago: Boolean
     ): Result<Producto> = runCatching {
-        val nombreBody = nombre.toRequestBody("text/plain".toMediaType())
-        val descripcionBody = descripcion.toRequestBody("text/plain".toMediaType())
-        val precioBody = precioInicial.toString().toRequestBody("text/plain".toMediaType())
-        val fechaInicioBody = fechaInicio.toRequestBody("text/plain".toMediaType())
-        val fechaFinBody = fechaFin.toRequestBody("text/plain".toMediaType())
+        val plain = "text/plain".toMediaType()
+        val nombreBody = nombre.toRequestBody(plain)
+        val descripcionBody = descripcion.toRequestBody(plain)
+        val precioBody = precioInicial.toString().toRequestBody(plain)
+        val fechaInicioBody = fechaInicio.toRequestBody(plain)
+        val fechaFinBody = fechaFin.toRequestBody(plain)
+        val latitudBody = latitud?.toString()?.toRequestBody(plain)
+        val longitudBody = longitud?.toString()?.toRequestBody(plain)
+        val ciudadBody = ciudad?.toRequestBody(plain)
+        val entregaBody = entregaEnPersona.toString().toRequestBody(plain)
+        val relampagoBody = esRelampago.toString().toRequestBody(plain)
 
         val imagenPart = if (imagenUrl.isNotBlank()) {
             val file = File(imagenUrl)
@@ -53,6 +78,11 @@ class ProductosRepositoryImpl @Inject constructor(
             precioInicial = precioBody,
             fechaInicio = fechaInicioBody,
             fechaFin = fechaFinBody,
+            latitud = latitudBody,
+            longitud = longitudBody,
+            ciudad = ciudadBody,
+            entregaEnPersona = entregaBody,
+            esRelampago = relampagoBody,
             imagen = imagenPart
         ).toDomain()
     }
@@ -68,5 +98,9 @@ class ProductosRepositoryImpl @Inject constructor(
 
     override suspend fun deleteProducto(id: Int): Result<Unit> = runCatching {
         api.deleteProducto(id)
+    }
+
+    override suspend fun getProductoAnalytics(id: Int): Result<ProductoAnalytics> = runCatching {
+        api.getProductoAnalytics(id).toDomain()
     }
 }

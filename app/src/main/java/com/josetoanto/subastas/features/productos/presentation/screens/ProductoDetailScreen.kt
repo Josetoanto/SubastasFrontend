@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -49,6 +50,8 @@ fun ProductoDetailScreen(
     productId: Int,
     onNavigateBack: () -> Unit,
     onNavigateToBids: () -> Unit,
+    onNavigateToFlashBids: () -> Unit,
+    onNavigateToAnalytics: () -> Unit,
     viewModel: ProductoDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -190,11 +193,25 @@ fun ProductoDetailScreen(
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Button(
-                                onClick = onNavigateToBids,
+                                onClick = {
+                                    if (p.esRelampago) onNavigateToFlashBids() else onNavigateToBids()
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Icon(Icons.Filled.Gavel, contentDescription = null)
-                                Text("  Ver Pujas / Pujar")
+                                Text(if (p.esRelampago) "  Oferta Relámpago" else "  Ver Pujas / Pujar")
+                            }
+
+                            if (state.isOwner) {
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                androidx.compose.material3.OutlinedButton(
+                                    onClick = onNavigateToAnalytics,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(Icons.Filled.BarChart, contentDescription = null)
+                                    Text("  Ver Analytics")
+                                }
                             }
                         }
                     }

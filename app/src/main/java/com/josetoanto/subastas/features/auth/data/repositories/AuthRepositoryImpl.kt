@@ -1,5 +1,6 @@
 package com.josetoanto.subastas.features.auth.data.repositories
 
+import com.google.firebase.messaging.FirebaseMessaging
 import com.josetoanto.subastas.features.auth.data.datasources.local.TokenDataStore
 import com.josetoanto.subastas.features.auth.data.datasources.remote.api.AuthApi
 import com.josetoanto.subastas.features.auth.data.datasources.remote.mapper.toDomain
@@ -10,6 +11,7 @@ import com.josetoanto.subastas.features.auth.domain.entities.User
 import com.josetoanto.subastas.features.auth.domain.repositories.AuthRepository
 import com.josetoanto.subastas.features.profile.data.datasources.remote.api.ProfileApi
 import javax.inject.Inject
+import kotlinx.coroutines.tasks.await
 
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
@@ -18,7 +20,14 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Result<AuthToken> = runCatching {
-        val response = authApi.login(LoginRequestDto(email = email, contrasena = password))
+        val fcmToken = runCatching { FirebaseMessaging.getInstance().token.await() }.getOrNull()
+        val response = authApi.login(
+            LoginRequestDto(
+                email = email,
+                contrasena = password,
+                fcmToken = fcmToken
+            )
+        )
         val token = response.toDomain()
         tokenDataStore.saveToken(token.accessToken)
         val me = profileApi.getMe()

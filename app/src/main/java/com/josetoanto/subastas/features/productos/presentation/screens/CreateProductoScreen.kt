@@ -34,6 +34,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.josetoanto.subastas.features.productos.presentation.components.DateTimePickerField
 import com.josetoanto.subastas.features.productos.presentation.viewmodels.CreateProductoViewModel
 import android.net.Uri
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import com.josetoanto.subastas.features.productos.presentation.components.ImagePickerField
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,23 +93,102 @@ fun CreateProductoScreen(
                 label = { Text("Precio inicial") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
 
+            if (state.esRelampago) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Bolt,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = "FLASH ACTIVADA: duración automática 5 minutos",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = viewModel::onQuickIncreasePrecio,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Subir precio +10")
+                }
+            }
+
             ImagePickerField(
                 imageUri = state.imageUri,
                 onImageSelected = viewModel::onImageSelected,
                 hasCameraFeature = viewModel.hasCameraFeature
             )
 
-            DateTimePickerField(
-                value = state.fechaInicio,
-                onValueChange = viewModel::onFechaInicioChange,
-                label = "Fecha inicio"
-            )
+            if (!state.esRelampago) {
+                DateTimePickerField(
+                    value = state.fechaInicio,
+                    onValueChange = viewModel::onFechaInicioChange,
+                    label = "Fecha inicio",
+                    enabled = true
+                )
 
-            DateTimePickerField(
-                value = state.fechaFin,
-                onValueChange = viewModel::onFechaFinChange,
-                label = "Fecha fin"
-            )
+                DateTimePickerField(
+                    value = state.fechaFin,
+                    onValueChange = viewModel::onFechaFinChange,
+                    label = "Fecha fin",
+                    enabled = true
+                )
+            }
+
+            OutlinedButton(
+                onClick = viewModel::fetchCurrentLocation,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.isLoadingLocation
+            ) {
+                if (state.isLoadingLocation) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                } else {
+                    Icon(Icons.Filled.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        if (state.latitud != null) "Ubicación: %.4f, %.4f".format(state.latitud, state.longitud)
+                        else "Usar mi ubicación"
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Entrega en persona")
+                Switch(checked = state.entregaEnPersona, onCheckedChange = viewModel::onEntregaEnPersonaChange)
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Subasta relámpago")
+                Switch(checked = state.esRelampago, onCheckedChange = viewModel::onEsRelampagoChange)
+            }
+
+            if (state.esRelampago) {
+                Text(
+                    text = "Las fechas se configuran automáticamente y no se muestran durante flash. La duración fija es de 5 minutos.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             state.errorMessage?.let { error ->
                 Text(text = error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

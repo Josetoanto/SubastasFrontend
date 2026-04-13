@@ -21,7 +21,8 @@ fun DateTimePickerField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     val context = LocalContext.current
 
@@ -53,7 +54,9 @@ fun DateTimePickerField(
         modifier = modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
-                detectTapGestures(onTap = { showPicker() })
+                detectTapGestures(onTap = {
+                    if (enabled) showPicker()
+                })
             }
     ) {
         OutlinedTextField(

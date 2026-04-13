@@ -54,6 +54,7 @@ import com.josetoanto.subastas.features.profile.presentation.viewmodels.ProfileV
 fun ProfileScreen(
     onLogout: () -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToActivity: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -167,6 +168,13 @@ fun ProfileScreen(
                     ) {
                         if (state.isUpdating) CircularProgressIndicator(modifier = Modifier.height(20.dp), color = MaterialTheme.colorScheme.onPrimary)
                         else Text("Guardar cambios")
+                    }
+
+                    OutlinedButton(
+                        onClick = onNavigateToActivity,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Actividad")
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))

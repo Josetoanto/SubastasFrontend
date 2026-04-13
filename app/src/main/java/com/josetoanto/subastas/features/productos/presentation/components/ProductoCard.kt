@@ -9,7 +9,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Badge
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +35,8 @@ import com.josetoanto.subastas.features.productos.domain.entities.Producto
 fun ProductoCard(
     producto: Producto,
     onClick: () -> Unit,
+    isFavorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -61,6 +69,18 @@ fun ProductoCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
+                if (onToggleFavorite != null) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End) {
+                        IconButton(onClick = onToggleFavorite) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                contentDescription = if (isFavorite) "Quitar favorito" else "Agregar favorito",
+                                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
@@ -81,6 +101,22 @@ fun ProductoCard(
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.weight(1f))
+                    if (producto.esRelampago) {
+                        Badge(containerColor = MaterialTheme.colorScheme.error) {
+                            Icon(
+                                imageVector = Icons.Filled.Bolt,
+                                contentDescription = "Relámpago",
+                                modifier = Modifier.size(10.dp),
+                                tint = MaterialTheme.colorScheme.onError
+                            )
+                            Text(
+                                text = "FLASH",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onError
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
                     Badge(containerColor = when (producto.status.lowercase()) {
                         "activo" -> MaterialTheme.colorScheme.primaryContainer
                         else -> MaterialTheme.colorScheme.surfaceVariant

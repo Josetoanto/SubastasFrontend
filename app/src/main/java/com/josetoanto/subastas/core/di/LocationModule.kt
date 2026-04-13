@@ -1,0 +1,18 @@
+package com.josetoanto.subastas.core.di
+
+import com.josetoanto.subastas.core.location.FusedLocationProvider
+import com.josetoanto.subastas.core.location.LocationProvider
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class LocationModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindLocationProvider(impl: FusedLocationProvider): LocationProvider
+}

@@ -2,6 +2,7 @@ package com.josetoanto.subastas.features.profile.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.josetoanto.subastas.core.local.AppLocalStore
 import com.josetoanto.subastas.features.auth.domain.repositories.AuthRepository
 import com.josetoanto.subastas.features.profile.domain.usecases.DeleteAccountUseCase
 import com.josetoanto.subastas.features.profile.domain.usecases.GetProfileUseCase
@@ -21,7 +22,8 @@ class ProfileViewModel @Inject constructor(
     private val getProfileUseCase: GetProfileUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val deleteAccountUseCase: DeleteAccountUseCase,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val appLocalStore: AppLocalStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileUIState())
@@ -65,6 +67,7 @@ class ProfileViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
+            appLocalStore.clearAll()
             _state.update { it.copy(deleteSuccess = true) }
         }
     }
@@ -73,7 +76,10 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             deleteAccountUseCase()
-                .onSuccess { _state.update { it.copy(isLoading = false, deleteSuccess = true) } }
+                .onSuccess {
+                    appLocalStore.clearAll()
+                    _state.update { it.copy(isLoading = false, deleteSuccess = true) }
+                }
                 .onFailure { e -> _state.update { it.copy(isLoading = false, errorMessage = e.toReadableMessage()) } }
         }
     }

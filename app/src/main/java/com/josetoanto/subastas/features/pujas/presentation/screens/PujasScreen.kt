@@ -29,7 +29,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,6 +52,13 @@ fun PujasScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    LaunchedEffect(state.triggerWinFeedback) {
+        if (state.triggerWinFeedback) viewModel.resetWinFeedback()
+    }
+    LaunchedEffect(state.triggerOutbidFeedback) {
+        if (state.triggerOutbidFeedback) viewModel.resetOutbidFeedback()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,6 +78,46 @@ fun PujasScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Flash auction countdown banner
+            if (state.esRelampago) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Bolt,
+                                contentDescription = "Relámpago",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            if (state.isExpired) {
+                                Text(
+                                    "¡Subasta finalizada!",
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            } else {
+                                val h = state.countdownSeconds / 3600
+                                val m = (state.countdownSeconds % 3600) / 60
+                                val s = state.countdownSeconds % 60
+                                Text(
+                                    text = "FLASH — Termina en %02d:%02d:%02d".format(h, m, s),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             // Bid form
             item {
                 Card(

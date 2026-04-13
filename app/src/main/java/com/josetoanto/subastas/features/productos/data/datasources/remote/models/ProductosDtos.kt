@@ -13,7 +13,13 @@ data class ProductoDto(
     @SerialName("status") val status: String,
     @SerialName("fecha_inicio") val fechaInicio: String,
     @SerialName("fecha_fin") val fechaFin: String,
-    @SerialName("precio_actual") val precioActual: Double? = null
+    @SerialName("precio_actual") val precioActual: Double? = null,
+    @SerialName("latitud") val latitud: Double? = null,
+    @SerialName("longitud") val longitud: Double? = null,
+    @SerialName("usuario_id") val usuarioId: Int? = null,
+    @SerialName("ciudad") val ciudad: String? = null,
+    @SerialName("entrega_en_persona") val entregaEnPersona: Boolean? = null,
+    @SerialName("es_relampago") val esRelampago: Boolean? = null
 )
 
 @Serializable
@@ -28,7 +34,12 @@ data class ProductoDetailDto(
     @SerialName("fecha_fin") val fechaFin: String,
     @SerialName("precio_actual") val precioActual: Double? = null,
     @SerialName("nombre_vendedor") val nombreVendedor: String,
-    @SerialName("usuario_id") val usuarioId: Int
+    @SerialName("usuario_id") val usuarioId: Int,
+    @SerialName("latitud") val latitud: Double? = null,
+    @SerialName("longitud") val longitud: Double? = null,
+    @SerialName("ciudad") val ciudad: String? = null,
+    @SerialName("entrega_en_persona") val entregaEnPersona: Boolean? = null,
+    @SerialName("es_relampago") val esRelampago: Boolean? = null
 )
 
 @Serializable

@@ -11,5 +11,11 @@ data class CreateProductoUIState(
     val fechaFin: String = "",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    // Geo
+    val latitud: Double? = null,
+    val longitud: Double? = null,
+    val entregaEnPersona: Boolean = false,
+    val esRelampago: Boolean = false,
+    val isLoadingLocation: Boolean = false
 )

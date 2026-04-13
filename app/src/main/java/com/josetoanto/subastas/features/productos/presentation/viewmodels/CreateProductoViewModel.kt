@@ -2,10 +2,12 @@ package com.josetoanto.subastas.features.productos.presentation.viewmodels
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.josetoanto.subastas.core.utils.toReadableMessage
 import com.josetoanto.subastas.core.hardware.domain.FeatureManager
+import com.josetoanto.subastas.core.location.LocationProvider
+import com.josetoanto.subastas.core.utils.toReadableMessage
 import com.josetoanto.subastas.features.productos.domain.usecases.CreateProductoUseCase
 import com.josetoanto.subastas.features.productos.presentation.screens.CreateProductoUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,12 +18,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateProductoViewModel @Inject constructor(
     private val createProductoUseCase: CreateProductoUseCase,
     private val featureManager: FeatureManager,
+    private val locationProvider: LocationProvider,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -36,7 +44,45 @@ class CreateProductoViewModel @Inject constructor(
     fun onFechaInicioChange(value: String) = _state.update { it.copy(fechaInicio = value) }
     fun onFechaFinChange(value: String) = _state.update { it.copy(fechaFin = value) }
     fun onImageSelected(uri: Uri) = _state.update { it.copy(imageUri = uri) }
+    fun onEntregaEnPersonaChange(value: Boolean) = _state.update { it.copy(entregaEnPersona = value) }
+    fun onEsRelampagoChange(value: Boolean) {
+        if (!value) {
+            _state.update { it.copy(esRelampago = false) }
+            return
+        }
+
+        val nowIso = nowIsoLocal()
+        val plusFiveIso = plusMinutesIsoLocal(5)
+        _state.update {
+            it.copy(
+                esRelampago = true,
+                fechaInicio = nowIso,
+                fechaFin = plusFiveIso
+            )
+        }
+    }
+
+    fun onQuickIncreasePrecio() {
+        _state.update {
+            val current = it.precioInicial.toDoubleOrNull() ?: 0.0
+            it.copy(precioInicial = "%.2f".format(Locale.US, current + 10.0))
+        }
+    }
+
     fun resetSuccess() = _state.update { it.copy(isSuccess = false) }
+
+    fun fetchCurrentLocation() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingLocation = true) }
+            locationProvider.getCurrentLocation()
+                .onSuccess { ll ->
+                    _state.update { it.copy(latitud = ll.lat, longitud = ll.lon, isLoadingLocation = false) }
+                }
+                .onFailure {
+                    _state.update { it.copy(isLoadingLocation = false, errorMessage = "No se pudo obtener la ubicación") }
+                }
+        }
+    }
 
     fun createProducto() {
         val s = _state.value
@@ -52,9 +98,23 @@ class CreateProductoViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
-            createProductoUseCase(s.nombre, s.descripcion, precio, imagePath, s.fechaInicio, s.fechaFin)
-                .onSuccess { _state.update { st -> st.copy(isLoading = false, isSuccess = true) } }
-                .onFailure { e -> _state.update { st -> st.copy(isLoading = false, errorMessage = e.toReadableMessage()) } }
+            createProductoUseCase(
+                nombre = s.nombre,
+                descripcion = s.descripcion,
+                precioInicial = precio,
+                imagenUrl = imagePath,
+                fechaInicio = s.fechaInicio,
+                fechaFin = s.fechaFin,
+                latitud = s.latitud,
+                longitud = s.longitud,
+                ciudad = null,
+                entregaEnPersona = s.entregaEnPersona,
+                esRelampago = s.esRelampago
+            ).onSuccess {
+                _state.update { st -> st.copy(isLoading = false, isSuccess = true) }
+            }.onFailure { e ->
+                _state.update { st -> st.copy(isLoading = false, errorMessage = e.toReadableMessage()) }
+            }
         }
     }
 
@@ -66,5 +126,39 @@ class CreateProductoViewModel @Inject constructor(
             }
         }
         return tempFile.absolutePath
+    }
+
+    private fun nowIsoLocal(): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return LocalDateTime.now()
+                .withSecond(0)
+                .withNano(0)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US))
+        }
+
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        @Suppress("SimpleDateFormat")
+        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).format(cal.time)
+    }
+
+    private fun plusMinutesIsoLocal(minutes: Int): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return LocalDateTime.now()
+                .withSecond(0)
+                .withNano(0)
+                .plusMinutes(minutes.toLong())
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.US))
+        }
+
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            add(Calendar.MINUTE, minutes)
+        }
+        @Suppress("SimpleDateFormat")
+        return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).format(cal.time)
     }
 }

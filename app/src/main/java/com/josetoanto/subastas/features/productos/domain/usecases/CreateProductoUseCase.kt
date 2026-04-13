@@ -13,6 +13,14 @@ class CreateProductoUseCase @Inject constructor(
         precioInicial: Double,
         imagenUrl: String,
         fechaInicio: String,
-        fechaFin: String
-    ): Result<Producto> = repository.createProducto(nombre, descripcion, precioInicial, imagenUrl, fechaInicio, fechaFin)
+        fechaFin: String,
+        latitud: Double? = null,
+        longitud: Double? = null,
+        ciudad: String? = null,
+        entregaEnPersona: Boolean = false,
+        esRelampago: Boolean = false
+    ): Result<Producto> = repository.createProducto(
+        nombre, descripcion, precioInicial, imagenUrl, fechaInicio, fechaFin,
+        latitud, longitud, ciudad, entregaEnPersona, esRelampago
+    )
 }
