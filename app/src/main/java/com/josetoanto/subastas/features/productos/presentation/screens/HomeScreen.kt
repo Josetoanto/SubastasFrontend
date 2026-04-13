@@ -16,39 +16,41 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,9 +59,62 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.josetoanto.subastas.features.productos.presentation.components.ProductoCard
 import com.josetoanto.subastas.features.productos.presentation.viewmodels.HomeViewModel
 import kotlin.math.roundToInt
+
+// ─────────────────────────────────────────────────────────────
+// Composables privados reutilizables
+// ─────────────────────────────────────────────────────────────
+
+@Composable
+private fun AiCategoryChips(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val aiCategories = listOf("Todos", "Tecnología", "Hogar", "Comida", "Bebida", "Otros")
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(bottom = 8.dp)
+    ) {
+        items(aiCategories, key = { it }) { category ->
+            FilterChip(
+                selected = selectedCategory == category,
+                onClick = { onCategorySelected(category) },
+                label = { Text(category) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun VolverButton(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = onBack,
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.ArrowBack,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("Volver a Todas", fontWeight = FontWeight.SemiBold)
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Pantalla principal
+// ─────────────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,7 +174,10 @@ fun HomeScreen(
             contentAlignment = Alignment.Center
         ) {
             when {
+                // 1. Cargando
                 state.isLoading -> CircularProgressIndicator()
+
+                // 2. Error
                 state.errorMessage != null -> Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -135,6 +193,47 @@ fun HomeScreen(
                         Text("Reintentar", fontWeight = FontWeight.SemiBold)
                     }
                 }
+
+                // 3. Sin resultados con filtro IA activo → pantalla vacía + botón volver
+                state.productos.isEmpty() && state.aiCategory != "Todos" && !state.isCategorizingByAi -> Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp)
+                ) {
+                    AiCategoryChips(
+                        selectedCategory = state.aiCategory,
+                        onCategorySelected = { viewModel.onAiCategorySelected(it) }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Icon(
+                        imageVector = Icons.Filled.ShoppingCart,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Sin resultados en \"${state.aiCategory}\"",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "No se encontraron subastas en esta categoría.\nPrueba con otra o vuelve a ver todas.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    VolverButton(
+                        onBack = { viewModel.onAiCategorySelected("Todos") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                // 4. Sin productos en absoluto (plataforma vacía)
                 state.productos.isEmpty() -> Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -163,41 +262,46 @@ fun HomeScreen(
                         Text("Crear Subasta")
                     }
                 }
+
+                // 5. Lista de productos
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Chips de categorías IA
                     item {
-                        val aiCategories = listOf("Todos", "Tecnología", "Hogar", "Comida", "Bebida", "Otros")
-                        androidx.compose.foundation.lazy.LazyRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(bottom = 8.dp)
-                        ) {
-                            items(aiCategories, key = { it }) { category ->
-                                androidx.compose.material3.FilterChip(
-                                    selected = state.aiCategory == category,
-                                    onClick = { viewModel.onAiCategorySelected(category) },
-                                    label = { Text(category) },
-                                    colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                )
-                            }
+                        AiCategoryChips(
+                            selectedCategory = state.aiCategory,
+                            onCategorySelected = { viewModel.onAiCategorySelected(it) }
+                        )
+                    }
+
+                    // Botón "Volver a Todas" cuando hay filtro activo con resultados y búsqueda finalizada
+                    if (state.aiCategory != "Todos" && !state.isCategorizingByAi) {
+                        item {
+                            VolverButton(
+                                onBack = { viewModel.onAiCategorySelected("Todos") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp)
+                            )
                         }
                     }
 
+                    // Indicador de progreso mientras clasifica la IA
                     if (state.isCategorizingByAi) {
                         item {
-                            androidx.compose.material3.LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp),
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
 
+                    // Botones de navegación rápida
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -263,6 +367,7 @@ fun HomeScreen(
                         }
                     }
 
+                    // Tarjetas de subastas
                     items(state.productos, key = { it.id }) { producto ->
                         ProductoCard(
                             producto = producto,
@@ -282,6 +387,7 @@ fun HomeScreen(
                 }
             }
 
+            // Diálogo de permiso de ubicación
             if (state.locationPermissionDenied) {
                 androidx.compose.material3.AlertDialog(
                     onDismissRequest = viewModel::onDismissLocationDenied,
@@ -297,6 +403,7 @@ fun HomeScreen(
         }
     }
 
+    // Bottom sheet de filtros adicionales
     if (state.showFilterSheet) {
         ModalBottomSheet(
             onDismissRequest = viewModel::onDismissFilterSheet,

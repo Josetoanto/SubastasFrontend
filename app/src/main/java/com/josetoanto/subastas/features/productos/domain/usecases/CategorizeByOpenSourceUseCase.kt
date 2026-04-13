@@ -12,7 +12,7 @@ class CategorizeByOpenSourceUseCase @Inject constructor(
     private val huggingFaceApi: HuggingFaceApi
 ) {
     // Es recomendable insertar un HF token en el Auth Header en Producción si las API fallan por cuota libre
-    private val hfToken: String? = null 
+    private val hfToken: String? = null
 
     suspend operator fun invoke(
         productos: List<Producto>,
@@ -23,38 +23,45 @@ class CategorizeByOpenSourceUseCase @Inject constructor(
                 return@runCatching productos
             }
 
+            // PASO 1: Filtrado por palabras clave (instantáneo, sin llamadas de red)
+            val keywordMatched = CategoryKeywordLibrary.filterByKeywords(productos, categoriaDestino)
+            val keywordMatchedIds = keywordMatched.map { it.id }.toSet()
+
+            // PASO 2: Solo los productos NO encontrados por keywords van a la IA
+            // Esto reduce drásticamente las llamadas a HuggingFace
             val candidateLabels = listOf("Tecnología", "Hogar", "Comida", "Bebida", "Otros")
             val authHeader = hfToken?.let { "Bearer $it" }
-            val filtrados = mutableListOf<Producto>()
-            
-            // En una App de producción masiva el filtrado IA debe ir en el BackEnd (Node/Python) para no bloquear la UI HTTP.
-            // Para fines de esta arquitectura, filtramos hasta 20 localmente para proteger los Timeouts.
-            for (producto in productos.take(20)) {
+            val aiMatched = mutableListOf<Producto>()
+
+            val toClassify = productos
+                .filter { it.id !in keywordMatchedIds }
+                .take(20) // Protege contra timeouts en HuggingFace
+
+            for (producto in toClassify) {
                 try {
                     val req = HfZeroShotRequest(
                         inputs = "${producto.nombre}. ${producto.descripcion}",
                         parameters = HfZeroShotParameters(candidate_labels = candidateLabels)
                     )
-                    
                     val res = huggingFaceApi.classifyText(
-                        authorization = authHeader, 
+                        authorization = authHeader,
                         body = req
                     )
-                    
                     if (res.error == null && res.labels.isNotEmpty()) {
-                        // El modelo asigna scores de probabilidad y ordena las labels de mayor a menor.
+                        // El modelo ordena labels de mayor a menor probabilidad
                         val topMatch = res.labels.first()
                         if (topMatch.equals(categoriaDestino, ignoreCase = true)) {
-                            filtrados.add(producto)
+                            aiMatched.add(producto)
                         }
                     }
                 } catch (e: Exception) {
-                    // Ignoramos el timeout o la falla de cuota para ese específico producto
+                    // Ignoramos el timeout o la falla de cuota para ese producto específico
                     e.printStackTrace()
                 }
             }
-            
-            filtrados
+
+            // PASO 3: Unión — keywords primero (orden de prioridad), luego IA, sin duplicados
+            (keywordMatched + aiMatched).distinctBy { it.id }
         }
     }
 }
