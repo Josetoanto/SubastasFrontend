@@ -18,11 +18,15 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -118,83 +122,132 @@ fun ProfileScreen(
                 else -> Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 24.dp)
+                        .padding(16.dp)
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Icon(
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = "Avatar",
-                        modifier = Modifier.size(96.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-
-                    state.profile?.let { profile ->
-                        Text(text = profile.email, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(text = "Miembro desde: ${profile.fechaRegistro.take(10)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-
-                    Text("Editar perfil", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, modifier = Modifier.align(Alignment.Start))
-
-                    OutlinedTextField(
-                        value = state.editNombre,
-                        onValueChange = viewModel::onEditNombreChange,
-                        label = { Text("Nombre") },
-                        leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                    // Profile header card
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-
-                    AuthTextField(
-                        value = state.editPassword,
-                        onValueChange = viewModel::onEditPasswordChange,
-                        label = "Nueva contraseña (opcional)",
-                        leadingIcon = Icons.Filled.Lock,
-                        isPassword = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    state.errorMessage?.let {
-                        Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                    }
-
-                    Button(
-                        onClick = viewModel::updateProfile,
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !state.isUpdating
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
-                        if (state.isUpdating) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.AccountCircle,
+                                contentDescription = "Avatar",
+                                modifier = Modifier.size(80.dp),
+                                tint = MaterialTheme.colorScheme.primary
                             )
+
+                            state.profile?.let { profile ->
+                                Text(
+                                    text = profile.nombre,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    text = profile.email,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    text = "Miembro desde ${profile.fechaRegistro.take(10)}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
                         }
-                        else Text("Guardar cambios")
                     }
 
+                    // Edit section
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                "Editar perfil",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            OutlinedTextField(
+                                value = state.editNombre,
+                                onValueChange = viewModel::onEditNombreChange,
+                                label = { Text("Nombre") },
+                                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+
+                            AuthTextField(
+                                value = state.editPassword,
+                                onValueChange = viewModel::onEditPasswordChange,
+                                label = "Nueva contraseña (opcional)",
+                                leadingIcon = Icons.Filled.Lock,
+                                isPassword = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            state.errorMessage?.let {
+                                Text(
+                                    it,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+
+                            Button(
+                                onClick = viewModel::updateProfile,
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !state.isUpdating
+                            ) {
+                                if (state.isUpdating) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                } else {
+                                    Text("Guardar cambios")
+                                }
+                            }
+                        }
+                    }
+
+                    // Actions
                     OutlinedButton(
                         onClick = onNavigateToActivity,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Actividad")
+                        Icon(Icons.Filled.Timeline, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text("Ver actividad")
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider()
 
                     OutlinedButton(
                         onClick = { showDeleteDialog = true },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Icon(Icons.Filled.Delete, contentDescription = null)
-                        Text("  Eliminar cuenta")
+                        Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text("Eliminar cuenta")
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
