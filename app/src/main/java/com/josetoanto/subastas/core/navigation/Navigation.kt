@@ -78,6 +78,9 @@ fun Navigation(navController: NavHostController) {
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToDetail = { productId ->
                     navController.navigate(Screens.ProductDetail.createRoute(productId))
+                },
+                onNavigateToCreateProduct = {
+                    navController.navigate(Screens.CreateProduct.route)
                 }
             )
         }
@@ -93,6 +96,9 @@ fun Navigation(navController: NavHostController) {
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToDetail = { productId ->
                     navController.navigate(Screens.ProductDetail.createRoute(productId))
+                },
+                onNavigateToCreateProduct = {
+                    navController.navigate(Screens.CreateProduct.route)
                 }
             )
         }

@@ -9,6 +9,7 @@ import com.josetoanto.subastas.core.hardware.domain.SoundManager
 import com.josetoanto.subastas.core.hardware.domain.VibrationManager
 import com.josetoanto.subastas.core.service.AuctionForegroundService
 import com.josetoanto.subastas.core.utils.parseIsoToEpochMillisOrNull
+import com.josetoanto.subastas.core.utils.toReadableMessage
 import com.josetoanto.subastas.core.websocket.WebSocketManager
 import com.josetoanto.subastas.features.auth.data.datasources.local.TokenDataStore
 import com.josetoanto.subastas.features.productos.domain.usecases.GetProductoDetailUseCase
@@ -47,6 +48,7 @@ class PujasViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(PujasUIState())
     val state: StateFlow<PujasUIState> = _state.asStateFlow()
+    private var foregroundServiceStarted = false
 
     init {
         loadPujas()
@@ -85,6 +87,8 @@ class PujasViewModel @Inject constructor(
     }
 
     private fun startForegroundService(nombre: String, fechaFin: String, esRelampago: Boolean) {
+        if (foregroundServiceStarted) return
+        foregroundServiceStarted = true
         val intent = AuctionForegroundService.startIntent(context, productId, nombre, fechaFin, esRelampago)
         context.startForegroundService(intent)
     }
@@ -157,7 +161,7 @@ class PujasViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isBidding = false,
-                            errorMessage = e.message ?: "Error al realizar puja",
+                            errorMessage = e.toReadableMessage(),
                             triggerOutbidFeedback = true
                         )
                     }

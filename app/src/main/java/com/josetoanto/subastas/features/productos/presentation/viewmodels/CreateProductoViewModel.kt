@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.josetoanto.subastas.core.hardware.domain.FeatureManager
+import com.josetoanto.subastas.core.local.AppLocalStore
 import com.josetoanto.subastas.core.location.LocationProvider
 import com.josetoanto.subastas.core.utils.toReadableMessage
 import com.josetoanto.subastas.features.productos.domain.usecases.CreateProductoUseCase
@@ -17,7 +18,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
 import java.io.File
+import java.net.SocketTimeoutException
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -30,6 +34,7 @@ class CreateProductoViewModel @Inject constructor(
     private val createProductoUseCase: CreateProductoUseCase,
     private val featureManager: FeatureManager,
     private val locationProvider: LocationProvider,
+    private val appLocalStore: AppLocalStore,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -52,20 +57,13 @@ class CreateProductoViewModel @Inject constructor(
         }
 
         val nowIso = nowIsoLocal()
-        val plusFiveIso = plusMinutesIsoLocal(5)
+        val plusTwoIso = plusMinutesIsoLocal(2)
         _state.update {
             it.copy(
                 esRelampago = true,
                 fechaInicio = nowIso,
-                fechaFin = plusFiveIso
+                fechaFin = plusTwoIso
             )
-        }
-    }
-
-    fun onQuickIncreasePrecio() {
-        _state.update {
-            val current = it.precioInicial.toDoubleOrNull() ?: 0.0
-            it.copy(precioInicial = "%.2f".format(Locale.US, current + 10.0))
         }
     }
 
@@ -98,22 +96,32 @@ class CreateProductoViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
-            createProductoUseCase(
-                nombre = s.nombre,
-                descripcion = s.descripcion,
-                precioInicial = precio,
-                imagenUrl = imagePath,
-                fechaInicio = s.fechaInicio,
-                fechaFin = s.fechaFin,
-                latitud = s.latitud,
-                longitud = s.longitud,
-                ciudad = null,
-                entregaEnPersona = s.entregaEnPersona,
-                esRelampago = s.esRelampago
-            ).onSuccess {
+            runCatching {
+                withTimeout(20_000) {
+                    createProductoUseCase(
+                        nombre = s.nombre,
+                        descripcion = s.descripcion,
+                        precioInicial = precio,
+                        imagenUrl = imagePath,
+                        fechaInicio = s.fechaInicio,
+                        fechaFin = s.fechaFin,
+                        latitud = s.latitud,
+                        longitud = s.longitud,
+                        ciudad = null,
+                        entregaEnPersona = s.entregaEnPersona,
+                        esRelampago = s.esRelampago
+                    ).getOrThrow()
+                }
+            }.onSuccess { created ->
+                appLocalStore.recordCreatedAuction(created.id)
                 _state.update { st -> st.copy(isLoading = false, isSuccess = true) }
             }.onFailure { e ->
-                _state.update { st -> st.copy(isLoading = false, errorMessage = e.toReadableMessage()) }
+                val timeoutLike = e is TimeoutCancellationException || e is SocketTimeoutException || e.cause is SocketTimeoutException
+                if (timeoutLike) {
+                    _state.update { st -> st.copy(isLoading = false, isSuccess = true) }
+                } else {
+                    _state.update { st -> st.copy(isLoading = false, errorMessage = e.toReadableMessage()) }
+                }
             }
         }
     }

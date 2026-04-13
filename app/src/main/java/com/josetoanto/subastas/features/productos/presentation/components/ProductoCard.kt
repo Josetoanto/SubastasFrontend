@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Card
@@ -37,6 +38,8 @@ fun ProductoCard(
     onClick: () -> Unit,
     isFavorite: Boolean = false,
     onToggleFavorite: (() -> Unit)? = null,
+    primaryActionText: String? = null,
+    onPrimaryAction: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -45,87 +48,101 @@ fun ProductoCard(
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            AsyncImage(
-                model = producto.imagenUrl.ifBlank { null },
-                contentDescription = producto.nombre,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(90.dp)
-                    .clip(MaterialTheme.shapes.medium)
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = producto.nombre,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+        Column {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                AsyncImage(
+                    model = producto.imagenUrl.ifBlank { null },
+                    contentDescription = producto.nombre,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(90.dp)
+                        .clip(MaterialTheme.shapes.medium)
                 )
 
-                if (onToggleFavorite != null) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End) {
-                        IconButton(onClick = onToggleFavorite) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                                contentDescription = if (isFavorite) "Quitar favorito" else "Agregar favorito",
-                                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = producto.nombre,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    if (onToggleFavorite != null) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End) {
+                            IconButton(onClick = onToggleFavorite) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                    contentDescription = if (isFavorite) "Quitar favorito" else "Agregar favorito",
+                                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = producto.descripcion,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Actual: $${producto.precioActual}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (producto.esRelampago) {
+                            Badge(containerColor = MaterialTheme.colorScheme.error) {
+                                Icon(
+                                    imageVector = Icons.Filled.Bolt,
+                                    contentDescription = "Relámpago",
+                                    modifier = Modifier.size(10.dp),
+                                    tint = MaterialTheme.colorScheme.onError
+                                )
+                                Text(
+                                    text = "FLASH",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onError
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
+                        Badge(containerColor = when (producto.status.lowercase()) {
+                            "activo" -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.surfaceVariant
+                        }) {
+                            Text(
+                                text = producto.status,
+                                style = MaterialTheme.typography.labelSmall
                             )
                         }
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = producto.descripcion,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Actual: $${producto.precioActual}",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    if (producto.esRelampago) {
-                        Badge(containerColor = MaterialTheme.colorScheme.error) {
-                            Icon(
-                                imageVector = Icons.Filled.Bolt,
-                                contentDescription = "Relámpago",
-                                modifier = Modifier.size(10.dp),
-                                tint = MaterialTheme.colorScheme.onError
-                            )
-                            Text(
-                                text = "FLASH",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onError
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(4.dp))
-                    }
-                    Badge(containerColor = when (producto.status.lowercase()) {
-                        "activo" -> MaterialTheme.colorScheme.primaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    }) {
-                        Text(
-                            text = producto.status,
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
+            if (primaryActionText != null && onPrimaryAction != null) {
+                Button(
+                    onClick = onPrimaryAction,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    Text(primaryActionText)
                 }
             }
         }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.josetoanto.subastas.core.local.AppLocalStore
 import com.josetoanto.subastas.core.location.LocationProvider
 import com.josetoanto.subastas.features.auth.data.datasources.local.TokenDataStore
+import com.josetoanto.subastas.features.productos.domain.entities.Producto
 import com.josetoanto.subastas.features.productos.domain.usecases.GetProductosUseCase
 import com.josetoanto.subastas.features.productos.presentation.screens.HomeUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,9 +51,7 @@ class HomeViewModel @Inject constructor(
                 soloRelampago = s.filterSoloRelampago,
                 soloEntregaPersona = s.filterSoloEntregaPersona
             ).onSuccess { productos ->
-                val visibles = productos.filter { p ->
-                    !p.esRelampago && (currentUserId == null || p.usuarioId != currentUserId)
-                }
+                val visibles = applyClientFilters(productos, currentUserId)
                 _state.update { it.copy(isLoading = false, productos = visibles, isUsingNearMe = false) }
             }.onFailure { e ->
                 _state.update { it.copy(isLoading = false, errorMessage = e.message ?: "Error al cargar productos") }
@@ -71,9 +70,7 @@ class HomeViewModel @Inject constructor(
                         lon = latLon.lon,
                         radioKm = _state.value.filterRadioKm
                     ).onSuccess { productos ->
-                        val visibles = productos.filter { p ->
-                            !p.esRelampago && (currentUserId == null || p.usuarioId != currentUserId)
-                        }
+                        val visibles = applyClientFilters(productos, currentUserId)
                         _state.update { it.copy(isLoading = false, productos = visibles, isUsingNearMe = true) }
                     }.onFailure { e ->
                         _state.update { it.copy(isLoading = false, errorMessage = e.message) }
@@ -107,6 +104,15 @@ class HomeViewModel @Inject constructor(
     fun onProductOpened(productId: Int) {
         viewModelScope.launch {
             appLocalStore.recordProductOpened(productId)
+        }
+    }
+
+    private fun applyClientFilters(
+        productos: List<Producto>,
+        currentUserId: Int?
+    ): List<Producto> {
+        return productos.filter { p ->
+            !p.esRelampago && (currentUserId == null || p.usuarioId != currentUserId)
         }
     }
 }

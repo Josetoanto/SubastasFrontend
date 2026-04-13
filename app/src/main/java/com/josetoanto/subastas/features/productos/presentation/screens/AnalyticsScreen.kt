@@ -23,7 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +41,7 @@ fun AnalyticsScreen(
     onNavigateBack: () -> Unit,
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -85,8 +85,6 @@ fun AnalyticsScreen(
 
             state.analytics != null -> {
                 val analytics = state.analytics!!
-                val precios = analytics.historialPrecios.map { it.precio }
-                val promedio = if (precios.isNotEmpty()) precios.average() else 0.0
                 val ultimoPrecio = analytics.historialPrecios.lastOrNull()
 
                 LazyColumn(
@@ -128,10 +126,6 @@ fun AnalyticsScreen(
                             RowSummary(
                                 title = "Puja mínima",
                                 value = analytics.pujaMinima?.let { "$%.2f".format(Locale.US, it) } ?: "—"
-                            )
-                            RowSummary(
-                                title = "Precio promedio",
-                                value = "$%.2f".format(Locale.US, promedio)
                             )
                         }
                     }
@@ -175,7 +169,8 @@ fun AnalyticsScreen(
                             )
                         }
                     } else {
-                        items(analytics.historialPrecios.takeLast(10).asReversed()) { entry ->
+                        val reversedHistory = analytics.historialPrecios.takeLast(10).asReversed()
+                        items(reversedHistory) { entry ->
                             HistoryPriceRow(entry)
                         }
                     }

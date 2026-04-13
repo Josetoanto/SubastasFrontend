@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,7 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -56,7 +57,7 @@ fun FlashPujasScreen(
     onNavigateBack: () -> Unit,
     viewModel: PujasViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val highestBid = state.pujas.maxOfOrNull { it.cantidad } ?: 0.0
     val minimumAllowed = if (highestBid > 0.0) highestBid + BID_STEP else BID_STEP
     var nextBid by rememberSaveable(productId) { mutableStateOf(minimumAllowed) }
@@ -104,7 +105,10 @@ fun FlashPujasScreen(
                         enabled = !state.isBidding && !state.isExpired
                     ) {
                         if (state.isBidding) {
-                            CircularProgressIndicator(modifier = Modifier.height(20.dp))
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp
+                            )
                         } else {
                             Text("Pujar +10 en 1 toque")
                         }

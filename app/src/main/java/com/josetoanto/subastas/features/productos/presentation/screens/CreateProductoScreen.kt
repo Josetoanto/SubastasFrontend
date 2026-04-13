@@ -24,7 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +51,7 @@ fun CreateProductoScreen(
     onNavigateBack: () -> Unit,
     viewModel: CreateProductoViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
@@ -109,18 +109,11 @@ fun CreateProductoScreen(
                             tint = MaterialTheme.colorScheme.error
                         )
                         Text(
-                            text = "FLASH ACTIVADA: duración automática 5 minutos",
+                            text = "FLASH ACTIVADA: duración automática 2 minutos",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
-                }
-
-                OutlinedButton(
-                    onClick = viewModel::onQuickIncreasePrecio,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Subir precio +10")
                 }
             }
 
@@ -183,7 +176,7 @@ fun CreateProductoScreen(
 
             if (state.esRelampago) {
                 Text(
-                    text = "Las fechas se configuran automáticamente y no se muestran durante flash. La duración fija es de 5 minutos.",
+                    text = "Las fechas se configuran automáticamente y no se muestran durante flash. La duración fija es de 2 minutos.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.fillMaxWidth()
@@ -199,7 +192,13 @@ fun CreateProductoScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLoading
             ) {
-                if (state.isLoading) CircularProgressIndicator(modifier = Modifier.height(20.dp), color = MaterialTheme.colorScheme.onPrimary)
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
                 else Text("Publicar Subasta")
             }
 

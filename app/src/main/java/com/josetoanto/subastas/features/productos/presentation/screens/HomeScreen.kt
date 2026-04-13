@@ -45,7 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,7 +67,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val locationLauncher = rememberLauncherForActivityResult(
@@ -119,7 +119,15 @@ fun HomeScreen(
                     text = state.errorMessage ?: "",
                     color = MaterialTheme.colorScheme.error
                 )
-                state.productos.isEmpty() -> Text("No hay subastas disponibles")
+                state.productos.isEmpty() -> Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text("No hay subastas disponibles")
+                    Button(onClick = onNavigateToCreateProduct) {
+                        Text("Agregar subasta")
+                    }
+                }
                 else -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
@@ -186,6 +194,11 @@ fun HomeScreen(
                             producto = producto,
                             isFavorite = state.favoriteIds.contains(producto.id),
                             onToggleFavorite = { viewModel.toggleFavorite(producto.id) },
+                            primaryActionText = "Pujar",
+                            onPrimaryAction = {
+                                viewModel.onProductOpened(producto.id)
+                                onNavigateToDetail(producto.id)
+                            },
                             onClick = {
                                 viewModel.onProductOpened(producto.id)
                                 onNavigateToDetail(producto.id)
@@ -245,8 +258,6 @@ fun HomeScreen(
                         onCheckedChange = viewModel::onFilterSoloEntregaPersonaChange
                     )
                 }
-
-                Spacer(modifier = Modifier.height(4.dp))
 
                 Button(
                     onClick = {

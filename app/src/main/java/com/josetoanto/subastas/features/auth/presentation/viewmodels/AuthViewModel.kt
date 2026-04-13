@@ -69,53 +69,44 @@ class AuthViewModel @Inject constructor(
 
     fun register() {
         val state = _registerState.value
-        var hasError = false
 
-        _registerState.update {
-            it.copy(
-                nombreError = null, emailError = null,
-                passwordError = null, confirmPasswordError = null,
-                errorMessage = null
-            )
-        }
-
-        if (state.nombre.isBlank()) {
-            _registerState.update { it.copy(nombreError = "El nombre es obligatorio") }
-            hasError = true
-        } else if (state.nombre.trim().length < 3) {
-            _registerState.update { it.copy(nombreError = "El nombre debe tener al menos 3 caracteres") }
-            hasError = true
+        val nombreError = when {
+            state.nombre.isBlank() -> "El nombre es obligatorio"
+            state.nombre.trim().length < 3 -> "El nombre debe tener al menos 3 caracteres"
+            else -> null
         }
 
         val emailPattern = android.util.Patterns.EMAIL_ADDRESS
-        if (state.email.isBlank()) {
-            _registerState.update { it.copy(emailError = "El correo es obligatorio") }
-            hasError = true
-        } else if (!emailPattern.matcher(state.email.trim()).matches()) {
-            _registerState.update { it.copy(emailError = "Formato de correo no valido") }
-            hasError = true
+        val emailError = when {
+            state.email.isBlank() -> "El correo es obligatorio"
+            !emailPattern.matcher(state.email.trim()).matches() -> "Formato de correo no valido"
+            else -> null
         }
 
-        if (state.password.isBlank()) {
-            _registerState.update { it.copy(passwordError = "La contrasena es obligatoria") }
-            hasError = true
-        } else if (state.password.length < 6) {
-            _registerState.update { it.copy(passwordError = "Minimo 6 caracteres") }
-            hasError = true
-        } else if (!state.password.any { it.isUpperCase() }) {
-            _registerState.update { it.copy(passwordError = "Debe contener al menos una mayuscula") }
-            hasError = true
-        } else if (!state.password.any { it.isDigit() }) {
-            _registerState.update { it.copy(passwordError = "Debe contener al menos un numero") }
-            hasError = true
+        val passwordError = when {
+            state.password.isBlank() -> "La contrasena es obligatoria"
+            state.password.length < 6 -> "Minimo 6 caracteres"
+            !state.password.any { it.isUpperCase() } -> "Debe contener al menos una mayuscula"
+            !state.password.any { it.isDigit() } -> "Debe contener al menos un numero"
+            else -> null
         }
 
-        if (state.confirmPassword.isBlank()) {
-            _registerState.update { it.copy(confirmPasswordError = "Confirma tu contrasena") }
-            hasError = true
-        } else if (state.password != state.confirmPassword) {
-            _registerState.update { it.copy(confirmPasswordError = "Las contrasenas no coinciden") }
-            hasError = true
+        val confirmPasswordError = when {
+            state.confirmPassword.isBlank() -> "Confirma tu contrasena"
+            state.password != state.confirmPassword -> "Las contrasenas no coinciden"
+            else -> null
+        }
+
+        val hasError = nombreError != null || emailError != null || passwordError != null || confirmPasswordError != null
+
+        _registerState.update {
+            it.copy(
+                nombreError = nombreError,
+                emailError = emailError,
+                passwordError = passwordError,
+                confirmPasswordError = confirmPasswordError,
+                errorMessage = null
+            )
         }
 
         if (hasError) return
