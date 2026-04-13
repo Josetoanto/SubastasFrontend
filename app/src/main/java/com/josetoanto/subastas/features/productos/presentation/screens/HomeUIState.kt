@@ -13,5 +13,9 @@ data class HomeUIState(
     val filterSoloEntregaPersona: Boolean = false,
     val isUsingNearMe: Boolean = false,
     val showFilterSheet: Boolean = false,
-    val locationPermissionDenied: Boolean = false
+    val locationPermissionDenied: Boolean = false,
+    
+    // Filtros IA
+    val aiCategory: String = "Todos",
+    val isCategorizingByAi: Boolean = false
 )

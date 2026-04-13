@@ -169,6 +169,36 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     item {
+                        val aiCategories = listOf("Todos", "Tecnología", "Hogar", "Comida", "Bebida", "Otros")
+                        androidx.compose.foundation.lazy.LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(bottom = 8.dp)
+                        ) {
+                            items(aiCategories, key = { it }) { category ->
+                                androidx.compose.material3.FilterChip(
+                                    selected = state.aiCategory == category,
+                                    onClick = { viewModel.onAiCategorySelected(category) },
+                                    label = { Text(category) },
+                                    colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    if (state.isCategorizingByAi) {
+                        item {
+                            androidx.compose.material3.LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)

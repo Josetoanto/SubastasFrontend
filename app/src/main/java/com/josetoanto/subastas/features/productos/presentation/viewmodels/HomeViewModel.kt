@@ -6,6 +6,7 @@ import com.josetoanto.subastas.core.local.AppLocalStore
 import com.josetoanto.subastas.core.location.LocationProvider
 import com.josetoanto.subastas.features.auth.data.datasources.local.TokenDataStore
 import com.josetoanto.subastas.features.productos.domain.entities.Producto
+import com.josetoanto.subastas.features.productos.domain.usecases.CategorizeByOpenSourceUseCase
 import com.josetoanto.subastas.features.productos.domain.usecases.GetProductosUseCase
 import com.josetoanto.subastas.features.productos.presentation.screens.HomeUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getProductosUseCase: GetProductosUseCase,
+    private val categorizeByOpenSourceUseCase: CategorizeByOpenSourceUseCase,
     private val locationProvider: LocationProvider,
     private val appLocalStore: AppLocalStore,
     private val tokenDataStore: TokenDataStore
@@ -28,6 +30,9 @@ class HomeViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(HomeUIState())
     val state: StateFlow<HomeUIState> = _state.asStateFlow()
+
+    // Cache interno para no volver a descargar cuando se cambia de categoría IA
+    private var allVisibleProductosCache = emptyList<Producto>()
 
     init {
         observeFavorites()
@@ -52,10 +57,62 @@ class HomeViewModel @Inject constructor(
                 soloEntregaPersona = s.filterSoloEntregaPersona
             ).onSuccess { productos ->
                 val visibles = applyClientFilters(productos, currentUserId)
-                _state.update { it.copy(isLoading = false, productos = visibles, isUsingNearMe = false) }
+                allVisibleProductosCache = visibles
+                
+                // Si la categoría IA no es "Todos", la aplicamos de inmediato, sino solo actualizamos vista
+                if (s.aiCategory != "Todos") {
+                    applyAiFilterCache(visibles, s.aiCategory)
+                } else {
+                    _state.update { it.copy(isLoading = false, productos = visibles, isUsingNearMe = false) }
+                }
             }.onFailure { e ->
                 _state.update { it.copy(isLoading = false, errorMessage = e.message ?: "Error al cargar productos") }
             }
+        }
+    }
+
+    fun onAiCategorySelected(category: String) {
+        if (_state.value.aiCategory == category) return
+        
+        _state.update { it.copy(aiCategory = category, isCategorizingByAi = true) }
+        applyAiFilterCache(allVisibleProductosCache, category)
+    }
+
+    private fun applyAiFilterCache(productosCache: List<Producto>, selectedCategory: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isCategorizingByAi = true) }
+            
+            if (selectedCategory == "Todos") {
+                _state.update { 
+                    it.copy(
+                        productos = productosCache, 
+                        isCategorizingByAi = false,
+                        isLoading = false
+                    ) 
+                }
+                return@launch
+            }
+
+            categorizeByOpenSourceUseCase(productosCache, selectedCategory)
+                .onSuccess { filteredByAi ->
+                    _state.update { 
+                        it.copy(
+                            productos = filteredByAi, 
+                            isCategorizingByAi = false,
+                            isLoading = false
+                        )
+                    }
+                }
+                .onFailure {
+                    // Si falla HF (timeouts o no token), simplemente restauramos a cache
+                    _state.update { 
+                        it.copy(
+                            productos = productosCache,
+                            isCategorizingByAi = false,
+                            isLoading = false
+                        ) 
+                    }
+                }
         }
     }
 
@@ -71,7 +128,8 @@ class HomeViewModel @Inject constructor(
                         radioKm = _state.value.filterRadioKm
                     ).onSuccess { productos ->
                         val visibles = applyClientFilters(productos, currentUserId)
-                        _state.update { it.copy(isLoading = false, productos = visibles, isUsingNearMe = true) }
+                        allVisibleProductosCache = visibles
+                        _state.update { it.copy(isLoading = false, productos = visibles, isUsingNearMe = true, aiCategory = "Todos") }
                     }.onFailure { e ->
                         _state.update { it.copy(isLoading = false, errorMessage = e.message) }
                     }

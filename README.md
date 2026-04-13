@@ -48,6 +48,11 @@ Aplicación Android nativa para subastas en línea en tiempo real. Los usuarios 
 - Edición de nombre y contraseña
 - Eliminación de cuenta
 
+### Tareas en Segundo Plano y Hardware
+- Sincronización transparente a través de un `CoroutineWorker` con **WorkManager**.
+- Ahorro de la energía del dispositivo mediante Constraints (`RequiresBatteryNotLow`, `NetworkType.CONNECTED`).
+- Sistema de **Runtime Permissions** reactivo con Compose manejando diálogos interactivos de Rationale (Ubicación, Cámara).
+
 ---
 
 ## Capturas de Pantalla
@@ -106,7 +111,8 @@ La aplicación sigue los principios de **Clean Architecture** combinados con el 
 | Serialización | `kotlinx.serialization.json` |
 | Carga de imágenes | Coil (`coil-compose`) |
 | WebSocket | OkHttp (integrado en el cliente Retrofit) |
-| Persistencia local | Room (runtime · ktx · compilador KSP) |
+| Concurrencia Términal | WorkManager (`work-runtime-ktx`, `hilt-work`) |
+| Persistencia local | Room (runtime · ktx · compilador KSP) con @Relation |
 | Preferencias | AndroidX DataStore (Preferences) |
 | Build tooling | KSP (Kotlin Symbol Processing) · Secrets Gradle Plugin |
 | Testing | JUnit · AndroidX Test · Espresso · Compose UI Test |
@@ -123,8 +129,13 @@ com.josetoanto.subastas/
 ├── core/
 │   ├── database/
 │   │   ├── AppDataBase.kt              # Base de datos Room
-│   │   ├── dao/PujaDao.kt              # Operaciones CRUD de pujas
-│   │   └── entities/PujaEntity.kt      # Entidad Room para caché local
+│   │   ├── dao/
+│   │   │   ├── PujaDao.kt              # Operaciones CRUD de pujas
+│   │   │   └── ProductoDao.kt          # Mutaciones transaccionales compuestas
+│   │   └── entities/
+│   │       ├── PujaEntity.kt           # Entidad local Room
+│   │       ├── ProductoEntity.kt       # Entidad base de Subastas 
+│   │       └── ProductoWithPujas.kt    # Clase Relacional DTO (1:N)
 │   ├── di/
 │   │   ├── DatabaseLiteModule.kt       # Módulo Hilt para Room
 │   │   ├── HardwareModule.kt           # Módulo Hilt para hardware
@@ -136,13 +147,17 @@ com.josetoanto.subastas/
 │   ├── navigation/
 │   │   ├── Navigation.kt               # NavHost con todas las rutas
 │   │   └── Screens.kt                  # Sealed class con rutas tipadas
-│   ├── ui/theme/                       # Color, Tipografía, Tema
+│   ├── ui/
+│   │   ├── components/                 # Composables base reutilizables (Botones, EmptyStates)
+│   │   └── theme/                      # Color, Tipografía, Tema
 │   ├── utils/
 │   │   ├── ApiErrorParser.kt           # Parseo de errores HTTP
 │   │   ├── HapticUtils.kt             # Vibración al ser superado en puja
 │   │   └── SoundUtils.kt              # Sonido de victoria con SoundPool
-│   └── websocket/
-│       └── WebSocketManager.kt         # Singleton WebSocket con SharedFlow
+│   ├── websocket/
+│   │   └── WebSocketManager.kt         # Singleton WebSocket con SharedFlow
+│   └── worker/
+│       └── SyncWorker.kt               # Trabajo de fondo gestionado por HiltWork
 │
 └── features/
     ├── auth/
@@ -237,6 +252,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 | Permiso | Uso |
 |---|---|
 | `INTERNET` | Llamadas a la API REST y conexión WebSocket |
+| `ACCESS_FINE_LOCATION` | Fetch del Location Client con diálogos Reactivos tipo Rationale en pantalla de listados |
 | `READ_MEDIA_IMAGES` | Selección de imágenes desde galería (Android 13+) |
 | `READ_EXTERNAL_STORAGE` *(maxSdkVersion 32)* | Selección de imágenes desde galería (Android 12 e inferior) |
 | `CAMERA` | Captura de fotografías para nuevas subastas |
@@ -291,9 +307,14 @@ El `WebSocketManager` gestiona el ciclo de vida de la conexión y expone un `Sha
 
 ---
 
-## Base de Datos Local
+## Base de Datos Local (Room)
 
-Room se usa para **cachear el historial de pujas**, proporcionando acceso offline.
+Room se usa poderosamente para **cachear el historial de operaciones y el estado**, proporcionando tanto acceso offline como eficiencia modular en la interfaz de persistencia.
+
+### Uso estratégico: Relaciones DAA 
+Añadimos **Relaciones 1:N** entre tablas base:
+- **`ProductoEntity` y `PujaEntity`**: Empaquetadas bajo en la data class `ProductoWithPujas` vía la anotación `@Relation`.
+- **Transacciones Optimizadas**: Las funciones críticas están etiquetados con `@Transaction` en `ProductoDao.kt`, aislando así operaciones compuestas (solicitud de las tablas padre-hijos en cascada) haciéndolo más seguro bajo bloqueos multi-hilo o concurrencias asincronicas.
 
 **Tabla: `pujas`**
 
