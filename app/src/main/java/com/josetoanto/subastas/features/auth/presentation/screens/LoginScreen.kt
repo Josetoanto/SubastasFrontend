@@ -66,7 +66,7 @@ fun LoginScreen(
                 )
 
                 Text(
-                    text = "Inicia sesión para continuar",
+                    text = "Inicia Sesión para Continuar",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -76,7 +76,7 @@ fun LoginScreen(
                 AuthTextField(
                     value = state.email,
                     onValueChange = viewModel::onLoginEmailChange,
-                    label = "Correo electrónico",
+                    label = "Correo Electrónico",
                     leadingIcon = Icons.Filled.Email,
                     keyboardType = KeyboardType.Email,
                     modifier = Modifier.fillMaxWidth()

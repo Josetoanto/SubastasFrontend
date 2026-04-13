@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm \"C:/Users/thega/AndroidStudioProjects/Subastas/app/src/main/java/com/josetoanto/subastas/features/productos/domain/ai/ProductTypeClassifier.kt\")",
+      "Bash(rm \"C:/Users/thega/AndroidStudioProjects/Subastas/app/src/main/java/com/josetoanto/subastas/features/productos/domain/entities/ProductType.kt\")",
+      "Bash(rmdir \"C:/Users/thega/AndroidStudioProjects/Subastas/app/src/main/java/com/josetoanto/subastas/features/productos/domain/ai\")"
+    ]
+  }
+}

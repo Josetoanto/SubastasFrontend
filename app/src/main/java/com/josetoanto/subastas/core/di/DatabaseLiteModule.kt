@@ -30,4 +30,9 @@ object DatabaseLiteModule {
     @Singleton
     fun providePujaDao(database: AppDataBase): PujaDao =
         database.pujaDao()
+
+    @Provides
+    @Singleton
+    fun provideProductoDao(database: AppDataBase): com.josetoanto.subastas.core.database.dao.ProductoDao =
+        database.productoDao()
 }

@@ -9,6 +9,13 @@ import androidx.navigation.compose.rememberNavController
 import com.josetoanto.subastas.core.navigation.Navigation
 import com.josetoanto.subastas.core.navigation.Screens
 import com.josetoanto.subastas.core.ui.theme.SubastasTheme
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import java.util.concurrent.TimeUnit
+import com.josetoanto.subastas.core.worker.SyncWorker
 import dagger.hilt.android.AndroidEntryPoint
 
 //Antonio
@@ -20,6 +27,22 @@ class MainActivity : ComponentActivity() {
 
         val fcmProductId = intent?.getIntExtra("fcm_product_id", -1)?.takeIf { it != -1 }
         val fcmType = intent?.getStringExtra("fcm_type")
+
+        // Setup background synchronization
+        val syncConstraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val syncWorkRequest = PeriodicWorkRequestBuilder<SyncWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(syncConstraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "SyncSubastasWork",
+            ExistingPeriodicWorkPolicy.KEEP,
+            syncWorkRequest
+        )
 
         setContent {
             SubastasTheme {

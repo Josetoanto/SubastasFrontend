@@ -97,7 +97,7 @@ fun FavoritesScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Sin favoritos aún",
+                        text = "Sin Favoritos Aún",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )

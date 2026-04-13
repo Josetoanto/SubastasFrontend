@@ -50,7 +50,7 @@ fun RegisterScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Crear cuenta") })
+            TopAppBar(title = { Text("Crear Cuenta") })
         }
     ) { paddingValues ->
         Box(
@@ -76,7 +76,7 @@ fun RegisterScreen(
                 AuthTextField(
                     value = state.nombre,
                     onValueChange = viewModel::onRegisterNombreChange,
-                    label = "Nombre completo",
+                    label = "Nombre Completo",
                     leadingIcon = Icons.Filled.Person,
                     modifier = Modifier.fillMaxWidth(),
                     isError = state.nombreError != null,
@@ -86,7 +86,7 @@ fun RegisterScreen(
                 AuthTextField(
                     value = state.email,
                     onValueChange = viewModel::onRegisterEmailChange,
-                    label = "Correo electronico",
+                    label = "Correo Electrónico",
                     leadingIcon = Icons.Filled.Email,
                     keyboardType = KeyboardType.Email,
                     modifier = Modifier.fillMaxWidth(),
@@ -97,7 +97,7 @@ fun RegisterScreen(
                 AuthTextField(
                     value = state.password,
                     onValueChange = viewModel::onRegisterPasswordChange,
-                    label = "Contrasena",
+                    label = "Contraseña",
                     leadingIcon = Icons.Filled.Lock,
                     isPassword = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -108,7 +108,7 @@ fun RegisterScreen(
                 AuthTextField(
                     value = state.confirmPassword,
                     onValueChange = viewModel::onRegisterConfirmPasswordChange,
-                    label = "Confirmar contrasena",
+                    label = "Confirmar Contraseña",
                     leadingIcon = Icons.Filled.Lock,
                     isPassword = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -140,7 +140,7 @@ fun RegisterScreen(
                 }
 
                 TextButton(onClick = onNavigateToLogin) {
-                    Text("¿Ya tienes cuenta? Inicia sesión")
+                    Text("¿Ya tienes cuenta? Inicia Sesión")
                 }
             }
         }

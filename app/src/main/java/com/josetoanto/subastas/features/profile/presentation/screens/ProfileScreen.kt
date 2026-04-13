@@ -71,7 +71,7 @@ fun ProfileScreen(
 
     LaunchedEffect(state.updateSuccess) {
         if (state.updateSuccess) {
-            snackbarHost.showSnackbar("Perfil actualizado correctamente")
+            snackbarHost.showSnackbar("Perfil Actualizado Correctamente")
             viewModel.resetUpdateSuccess()
         }
     }
@@ -79,7 +79,7 @@ fun ProfileScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Eliminar cuenta") },
+            title = { Text("Eliminar Cuenta") },
             text = { Text("Esta acción es irreversible. ¿Deseas eliminar tu cuenta?") },
             confirmButton = {
                 Button(
@@ -176,7 +176,7 @@ fun ProfileScreen(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Text(
-                                "Editar perfil",
+                                "Editar Perfil",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -219,7 +219,7 @@ fun ProfileScreen(
                                         color = MaterialTheme.colorScheme.onPrimary
                                     )
                                 } else {
-                                    Text("Guardar cambios")
+                                    Text("Guardar Cambios")
                                 }
                             }
                         }
@@ -232,7 +232,7 @@ fun ProfileScreen(
                     ) {
                         Icon(Icons.Filled.Timeline, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.size(8.dp))
-                        Text("Ver actividad")
+                        Text("Ver Actividad")
                     }
 
                     HorizontalDivider()
@@ -244,7 +244,7 @@ fun ProfileScreen(
                     ) {
                         Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.size(8.dp))
-                        Text("Eliminar cuenta")
+                        Text("Eliminar Cuenta")
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))

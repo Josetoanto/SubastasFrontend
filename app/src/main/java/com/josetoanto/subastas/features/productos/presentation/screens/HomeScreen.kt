@@ -3,6 +3,7 @@ package com.josetoanto.subastas.features.productos.presentation.screens
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -81,7 +83,7 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (state.isUsingNearMe) "Subastas cercanas" else "Subastas")
+                    Text(if (state.isUsingNearMe) "Subastas Cercanas" else "Subastas")
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -130,7 +132,7 @@ fun HomeScreen(
                         textAlign = TextAlign.Center
                     )
                     Button(onClick = viewModel::loadProductos) {
-                        Text("Reintentar")
+                        Text("Reintentar", fontWeight = FontWeight.SemiBold)
                     }
                 }
                 state.productos.isEmpty() -> Column(
@@ -146,7 +148,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "No hay subastas disponibles",
+                        text = "No Hay Subastas Disponibles",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -158,7 +160,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(onClick = onNavigateToCreateProduct) {
-                        Text("Crear subasta")
+                        Text("Crear Subasta")
                     }
                 }
                 else -> LazyColumn(
@@ -175,48 +177,57 @@ fun HomeScreen(
                                 onClick = onNavigateToFavorites,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(44.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                             ) {
-                                Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "Favoritos",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.labelSmall
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                             OutlinedButton(
                                 onClick = onNavigateToMyAuctions,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(44.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                             ) {
-                                Icon(Icons.Filled.List, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Filled.List, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Mis subastas",
+                                    text = "Mis Subastas",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.labelSmall
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                             OutlinedButton(
                                 onClick = onNavigateToFlashAuctions,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(44.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                             ) {
-                                Icon(Icons.Filled.Bolt, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Filled.Bolt, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "Flash",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.labelSmall
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
@@ -242,18 +253,16 @@ fun HomeScreen(
             }
 
             if (state.locationPermissionDenied) {
-                Snackbar(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp),
-                    action = {
-                        TextButton(onClick = viewModel::onDismissLocationDenied) {
-                            Text("OK")
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = viewModel::onDismissLocationDenied,
+                    title = { Text("Permiso de Ubicación") },
+                    text = { Text("Para buscar subastas cerca de ti, necesitamos usar tu ubicación. Autoriza el permiso en la configuración.") },
+                    confirmButton = {
+                        Button(onClick = viewModel::onDismissLocationDenied) {
+                            Text("Aceptar")
                         }
                     }
-                ) {
-                    Text("Permiso de ubicación denegado")
-                }
+                )
             }
         }
     }
@@ -272,7 +281,7 @@ fun HomeScreen(
             ) {
                 Text("Filtros", style = MaterialTheme.typography.titleLarge)
 
-                Text("Radio de búsqueda: ${state.filterRadioKm.roundToInt()} km")
+                Text("Radio de Búsqueda: ${state.filterRadioKm.roundToInt()} km")
                 Slider(
                     value = state.filterRadioKm.toFloat(),
                     onValueChange = { viewModel.onFilterRadioKmChange(it.toDouble()) },
@@ -285,7 +294,7 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Solo entrega en persona")
+                    Text("Solo Entrega en Persona")
                     Switch(
                         checked = state.filterSoloEntregaPersona,
                         onCheckedChange = viewModel::onFilterSoloEntregaPersonaChange
@@ -299,7 +308,7 @@ fun HomeScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Aplicar filtros")
+                    Text("Aplicar Filtros")
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.josetoanto.subastas.features.productos.presentation.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +43,11 @@ fun ProductoCard(
     onPrimaryAction: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val endMillis = com.josetoanto.subastas.core.utils.parseIsoToEpochMillisOrNull(producto.fechaFin)
+    val isFinished = endMillis != null && endMillis <= System.currentTimeMillis()
+    val finalStatus = if (isFinished) "Finalizado" else producto.status.replaceFirstChar { it.uppercase() }
+    val isActivo = finalStatus.lowercase() == "activo"
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -50,7 +56,12 @@ fun ProductoCard(
     ) {
         Column {
             Row(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(
+                    start = 12.dp, 
+                    top = 12.dp, 
+                    end = 12.dp, 
+                    bottom = if (primaryActionText != null && onPrimaryAction != null) 0.dp else 12.dp
+                ),
                 verticalAlignment = Alignment.Top
             ) {
                 AsyncImage(
@@ -65,21 +76,29 @@ fun ProductoCard(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = producto.nombre,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    if (onToggleFavorite != null) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End) {
-                            IconButton(onClick = onToggleFavorite) {
+                    // Title row with favorite icon aligned to the right
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = producto.nombre,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (onToggleFavorite != null) {
+                            IconButton(
+                                onClick = onToggleFavorite,
+                                modifier = Modifier.size(36.dp)
+                            ) {
                                 Icon(
                                     imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                                    contentDescription = if (isFavorite) "Quitar favorito" else "Agregar favorito",
-                                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                    contentDescription = if (isFavorite) "Quitar Favorito" else "Agregar Favorito",
+                                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -87,6 +106,7 @@ fun ProductoCard(
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // Description
                     Text(
                         text = producto.descripcion,
                         style = MaterialTheme.typography.bodySmall,
@@ -97,44 +117,50 @@ fun ProductoCard(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Price and Badges row
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Text(
                             text = "Actual: $${producto.precioActual}",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.weight(1f))
-                        if (producto.esRelampago) {
-                            Badge(containerColor = MaterialTheme.colorScheme.error) {
-                                Icon(
-                                    imageVector = Icons.Filled.Bolt,
-                                    contentDescription = "Relámpago",
-                                    modifier = Modifier.size(10.dp),
-                                    tint = MaterialTheme.colorScheme.onError
-                                )
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (producto.esRelampago) {
+                                Badge(containerColor = MaterialTheme.colorScheme.error) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Bolt,
+                                        contentDescription = "Relámpago",
+                                        modifier = Modifier.size(10.dp),
+                                        tint = MaterialTheme.colorScheme.onError
+                                    )
+                                    Text(
+                                        text = "FLASH",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onError
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(4.dp))
+                            }
+                            Badge(containerColor = if (isActivo) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant) {
                                 Text(
-                                    text = "FLASH",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onError
+                                    text = finalStatus,
+                                    style = MaterialTheme.typography.labelSmall
                                 )
                             }
-                            Spacer(modifier = Modifier.width(4.dp))
-                        }
-                        Badge(containerColor = when (producto.status.lowercase()) {
-                            "activo" -> MaterialTheme.colorScheme.primaryContainer
-                            else -> MaterialTheme.colorScheme.surfaceVariant
-                        }) {
-                            Text(
-                                text = producto.status,
-                                style = MaterialTheme.typography.labelSmall
-                            )
                         }
                     }
                 }
             }
 
             if (primaryActionText != null && onPrimaryAction != null) {
+                // Remove top padding, add smaller spacing between content above
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = onPrimaryAction,
                     modifier = Modifier

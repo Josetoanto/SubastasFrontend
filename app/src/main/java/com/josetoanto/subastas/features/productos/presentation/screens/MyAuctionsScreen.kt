@@ -49,7 +49,7 @@ fun MyAuctionsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mis subastas") },
+                title = { Text("Mis Subastas") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")

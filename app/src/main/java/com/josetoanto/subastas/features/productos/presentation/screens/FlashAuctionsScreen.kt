@@ -49,7 +49,7 @@ fun FlashAuctionsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Subastas relámpago") },
+                title = { Text("Subastas Relámpago") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
@@ -101,7 +101,7 @@ fun FlashAuctionsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Sin subastas relámpago",
+                        text = "Sin Subastas Relámpago",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -113,7 +113,7 @@ fun FlashAuctionsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(onClick = onNavigateToCreateProduct) {
-                        Text("Crear subasta")
+                        Text("Crear Subasta")
                     }
                 }
 

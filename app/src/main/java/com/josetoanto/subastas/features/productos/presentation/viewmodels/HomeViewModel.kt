@@ -112,7 +112,8 @@ class HomeViewModel @Inject constructor(
         currentUserId: Int?
     ): List<Producto> {
         return productos.filter { p ->
-            !p.esRelampago && (currentUserId == null || p.usuarioId != currentUserId)
+            !p.esRelampago &&
+                (p.status.lowercase() == "activo" || p.usuarioId == currentUserId)
         }
     }
 }

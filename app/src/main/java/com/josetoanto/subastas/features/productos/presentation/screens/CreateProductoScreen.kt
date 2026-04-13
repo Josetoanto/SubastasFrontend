@@ -1,5 +1,8 @@
 package com.josetoanto.subastas.features.productos.presentation.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -53,6 +56,14 @@ fun CreateProductoScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val locationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            viewModel.fetchCurrentLocation()
+        }
+    }
+
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
             viewModel.resetSuccess()
@@ -84,13 +95,13 @@ fun CreateProductoScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(value = state.nombre, onValueChange = viewModel::onNombreChange,
-                label = { Text("Nombre del producto") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                label = { Text("Nombre del Producto") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
             OutlinedTextField(value = state.descripcion, onValueChange = viewModel::onDescripcionChange,
                 label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 5)
 
             OutlinedTextField(value = state.precioInicial, onValueChange = viewModel::onPrecioInicialChange,
-                label = { Text("Precio inicial") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
+                label = { Text("Precio Inicial") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
 
             if (state.esRelampago) {
@@ -127,20 +138,20 @@ fun CreateProductoScreen(
                 DateTimePickerField(
                     value = state.fechaInicio,
                     onValueChange = viewModel::onFechaInicioChange,
-                    label = "Fecha inicio",
+                    label = "Fecha Inicio",
                     enabled = true
                 )
 
                 DateTimePickerField(
                     value = state.fechaFin,
                     onValueChange = viewModel::onFechaFinChange,
-                    label = "Fecha fin",
+                    label = "Fecha Fin",
                     enabled = true
                 )
             }
 
             OutlinedButton(
-                onClick = viewModel::fetchCurrentLocation,
+                onClick = { locationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLoadingLocation
             ) {
@@ -151,7 +162,7 @@ fun CreateProductoScreen(
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         if (state.latitud != null) "Ubicación: %.4f, %.4f".format(state.latitud, state.longitud)
-                        else "Usar mi ubicación"
+                        else "Usar Mi Ubicación"
                     )
                 }
             }
@@ -161,7 +172,7 @@ fun CreateProductoScreen(
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Entrega en persona")
+                Text("Entrega en Persona")
                 Switch(checked = state.entregaEnPersona, onCheckedChange = viewModel::onEntregaEnPersonaChange)
             }
 
@@ -170,7 +181,7 @@ fun CreateProductoScreen(
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Subasta relámpago")
+                Text("Subasta Relámpago")
                 Switch(checked = state.esRelampago, onCheckedChange = viewModel::onEsRelampagoChange)
             }
 
